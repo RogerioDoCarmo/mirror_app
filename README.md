@@ -43,12 +43,33 @@ No implementation file exists without a corresponding test file written first.
 | Layer              | Tool                                   |
 | ------------------ | -------------------------------------- |
 | Unit & Integration | Jest 29 + React Native Testing Library |
+| Property-based     | fast-check                             |
 | Mutation           | Stryker                                |
 | End-to-End         | Maestro                                |
 
 **Coverage threshold: 80%** across statements, branches, functions, and lines — enforced on every commit via a pre-commit hook. Commits are rejected if coverage drops below this threshold.
 
 **Mutation score threshold: 60% (break) / 80% (target)** — Stryker verifies that tests are actually sensitive to code changes, not just present.
+
+### Property-Based Testing
+
+Unit tests verify specific examples. Property-based tests verify **invariants** — rules that must hold for _any_ input the generator can produce.
+
+[fast-check](https://fast-check.dev) is used alongside Jest to express these invariants. When a property fails, fast-check automatically shrinks the counterexample to the smallest input that reproduces the failure.
+
+**Invariants tested:**
+
+| Component / Hook | Property                                                                          |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `useCamera`      | `isReady` is always `false` on mount, regardless of permission state              |
+| `useCamera`      | `cameraRef.current` is always `null` on mount, regardless of permission state     |
+| `useCamera`      | All required return keys are always present, regardless of permission state       |
+| `useCamera`      | `permission` always reflects exactly what `useCameraPermissions` returns          |
+| `PermissionGate` | `permission=null` always renders the loading indicator and never renders children |
+| `PermissionGate` | `granted=true` always renders children for any value of `canAskAgain`             |
+| `PermissionGate` | `granted=false` never renders children for any value of `canAskAgain`             |
+| `PermissionGate` | `granted=false, canAskAgain=true` always shows the grant button                   |
+| `PermissionGate` | `granted=false, canAskAgain=false` always shows the settings message              |
 
 ### Static Analysis
 
