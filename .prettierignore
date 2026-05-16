@@ -1,0 +1,6 @@
+node_modules
+.expo
+coverage
+.stryker-tmp
+reports
+pnpm-lock.yaml
