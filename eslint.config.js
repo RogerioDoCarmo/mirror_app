@@ -63,6 +63,7 @@ module.exports = typescriptEslint.config(
       ...jestPlugin.configs.recommended.rules,
       ...testingLibraryPlugin.configs.react.rules,
       '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       // jest.mock() factories must use require() — static imports can't be hoisted inside them
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/consistent-type-imports': 'off',
