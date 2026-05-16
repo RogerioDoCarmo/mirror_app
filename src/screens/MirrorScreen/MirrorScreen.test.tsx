@@ -1,0 +1,90 @@
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react-native';
+import { MirrorScreen } from './MirrorScreen';
+
+jest.mock('@/hooks/useCamera', () => ({
+  useCamera: jest.fn(),
+}));
+
+jest.mock('expo-camera', () => {
+  // `require` is allowed in jest.mock factories; variables must be mock-prefixed
+  // to satisfy Babel's jest-hoist plugin when they reference out-of-scope imports.
+  const mockReact = require('react') as typeof import('react');
+  const { View } = require('react-native') as typeof import('react-native');
+  const MockCameraView = ({ testID }: { testID?: string }) =>
+    mockReact.createElement(View, { testID: testID ?? 'camera-view' });
+  return { CameraView: MockCameraView };
+});
+
+const { useCamera } = require('@/hooks/useCamera') as { useCamera: jest.Mock };
+
+const mockCameraRef = { current: null };
+const mockOnCameraReady = jest.fn();
+const mockRequestPermission = jest.fn();
+
+const baseHookReturn = {
+  cameraRef: mockCameraRef,
+  isReady: false,
+  onCameraReady: mockOnCameraReady,
+  requestPermission: mockRequestPermission,
+};
+
+describe('MirrorScreen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('shows a loading indicator while camera permissions are being determined', () => {
+    useCamera.mockReturnValue({ ...baseHookReturn, permission: null });
+
+    render(<MirrorScreen />);
+
+    expect(screen.getByTestId('permission-loading')).toBeTruthy();
+  });
+
+  it('shows the permission rationale when access is denied', () => {
+    useCamera.mockReturnValue({
+      ...baseHookReturn,
+      permission: { granted: false, canAskAgain: true },
+    });
+
+    render(<MirrorScreen />);
+
+    expect(screen.getByText('Camera access is required to use MirrorApp.')).toBeTruthy();
+  });
+
+  it('calls requestPermission when the grant button is pressed', () => {
+    useCamera.mockReturnValue({
+      ...baseHookReturn,
+      permission: { granted: false, canAskAgain: true },
+    });
+
+    render(<MirrorScreen />);
+    fireEvent.press(screen.getByText('Grant Permission'));
+
+    expect(mockRequestPermission).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the camera view when permission is granted', () => {
+    useCamera.mockReturnValue({
+      ...baseHookReturn,
+      permission: { granted: true, canAskAgain: true },
+    });
+
+    render(<MirrorScreen />);
+
+    expect(screen.getByTestId('mirror-container')).toBeTruthy();
+    expect(screen.getByTestId('camera-view')).toBeTruthy();
+  });
+
+  it('does not show the camera when permission is denied', () => {
+    useCamera.mockReturnValue({
+      ...baseHookReturn,
+      permission: { granted: false, canAskAgain: true },
+    });
+
+    render(<MirrorScreen />);
+
+    expect(screen.queryByTestId('camera-view')).toBeNull();
+  });
+});
