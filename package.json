@@ -1,22 +1,56 @@
 {
-  "name": "mirror_app",
+  "name": "mirror-app",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "run:android": "expo run:android --device",
+    "run:ios": "expo run:ios --device",
+    "build:apk": "eas build --platform android --profile preview",
+    "build:ipa": "eas build --platform ios --profile production",
+    "test:e2e": "maestro test .maestro/",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --coverage --ci --forceExit",
+    "mutation": "stryker run",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
   },
   "dependencies": {
     "expo": "~54.0.33",
+    "expo-camera": "~17.0.10",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/jest-runner": "^9.6.1",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
-    "typescript": "~5.9.2"
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jest": "^29.15.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-native": "^5.0.0",
+    "eslint-plugin-testing-library": "^7.16.2",
+    "husky": "^9.1.7",
+    "jest-expo": "^54.0.17",
+    "lint-staged": "^17.0.5",
+    "prettier": "^3.8.3",
+    "react-test-renderer": "19.1.0",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.59.3"
   },
   "private": true
 }
