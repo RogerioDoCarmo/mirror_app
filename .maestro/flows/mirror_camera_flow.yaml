@@ -1,0 +1,11 @@
+appId: com.mirrorapp.app
+---
+# Flow: Camera view is displayed in mirror mode after permission is granted
+- launchApp:
+    clearState: false  # assumes permission already granted
+
+- assertVisible:
+    id: "mirror-container"
+
+- assertVisible:
+    id: "camera-view"

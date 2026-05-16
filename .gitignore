@@ -39,3 +39,11 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Test coverage & mutation reports
+coverage/
+reports/
+.stryker-tmp/
+
+# Store submission secrets
+google-services-key.json
