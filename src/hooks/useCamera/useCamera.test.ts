@@ -95,4 +95,15 @@ describe('useCamera', () => {
     expect(result.current.cameraRef).toBeDefined();
     expect(result.current.cameraRef.current).toBeNull();
   });
+
+  it('returns the same onCameraReady reference across re-renders', () => {
+    mockUseCameraPermissions.mockReturnValue([null, mockRequestPermission, jest.fn()]);
+
+    const { result, rerender } = renderHook(() => useCamera());
+    const firstRef = result.current.onCameraReady;
+
+    rerender({});
+
+    expect(result.current.onCameraReady).toBe(firstRef);
+  });
 });
