@@ -10,12 +10,23 @@ jest.mock('expo-camera', () => ({
 
 const mockUseCameraPermissions = jest.mocked(useCameraPermissions);
 
-const permissionArb = fc.record<PermissionResponse>({
-  granted: fc.boolean(),
-  canAskAgain: fc.boolean(),
-  expires: fc.constantFrom('never' as const),
-  status: fc.constantFrom('granted' as const, 'denied' as const, 'undetermined' as const),
-});
+// PermissionStatus is an opaque enum in expo-modules-core — cast each value to
+// PermissionResponse['status'] so the arbitrary is compatible regardless of how
+// the host environment resolves the enum. The .map() cast pins the output type
+// to PermissionResponse, working around fc.record's interaction with
+// exactOptionalPropertyTypes (which would otherwise make every field optional).
+const permissionArb: fc.Arbitrary<PermissionResponse> = fc
+  .record({
+    granted: fc.boolean(),
+    canAskAgain: fc.boolean(),
+    expires: fc.constant('never'),
+    status: fc.constantFrom(
+      'granted' as PermissionResponse['status'],
+      'denied' as PermissionResponse['status'],
+      'undetermined' as PermissionResponse['status'],
+    ),
+  })
+  .map((p) => p);
 
 const nullablePermissionArb = fc.option(permissionArb, { nil: null });
 
