@@ -4,9 +4,9 @@ appId: com.mirrorapp.app
 - launchApp:
     clearState: true
 
-- assertVisible: "Camera access is required to use MirrorApp."
-- tapOn: "Grant Permission"
+- assertVisible: 'Camera access is required to use MirrorApp.'
+- tapOn: 'Grant Permission'
 
 # After granting, the camera view should be visible
 - assertVisible:
-    id: "mirror-container"
+    id: 'mirror-container'
