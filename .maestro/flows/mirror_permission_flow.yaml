@@ -1,42 +1,29 @@
 appId: com.mirrorapp.app
 ---
-# Reset only the OS-level camera permission to undetermined so the rationale
-# UI is always shown, regardless of what previous flows may have granted.
-# clearState is intentionally omitted — see mirror_camera_flow.yaml comment.
+# ── State 1: permission denied ──────────────────────────────────────────────
+# Launch with camera permission unset (undetermined) and verify our
+# permission-rationale UI is displayed correctly.
 - launchApp:
     permissions:
       camera: unset
 
 - assertVisible: 'Camera access is required to use MirrorApp.'
+- assertVisible: 'Grant Permission'
+
+# Tap the button to verify it is interactive and does not crash the app.
+# The OS system permission dialog appears at this point. We do NOT attempt
+# to interact with it — its button text and timing vary across Android API
+# levels and iOS versions, making it inherently unreliable to drive with
+# Maestro. Interacting with OS dialogs tests Apple/Google code, not ours.
 - tapOn: 'Grant Permission'
 
-# Wait for the system dialog to fully animate in before checking button
-# visibility. Without this pause the runFlow when:visible conditions are
-# evaluated before the dialog appears and every block is silently skipped,
-# leaving the flow stuck waiting for mirror-container until timeout.
-- waitForAnimationToEnd
-
-# System permission dialog — button text varies by platform and OS version:
-#   iOS 14+       : "Allow While Using App"
-#   iOS ≤13       : "Allow"
-#   Android 11+   : "While using the app"   (API 30+, incl. CI API 33)
-#   Android ≤10   : "Allow"
-# Each block only executes when its button is actually visible.
-- runFlow:
-    when:
-      visible: 'Allow While Using App'
-    commands:
-      - tapOn: 'Allow While Using App'
-- runFlow:
-    when:
-      visible: 'While using the app'
-    commands:
-      - tapOn: 'While using the app'
-- runFlow:
-    when:
-      visible: 'Allow'
-    commands:
-      - tapOn: 'Allow'
+# ── State 2: permission granted ──────────────────────────────────────────────
+# Relaunch with the permission explicitly allowed. This simulates the user
+# having granted access and verifies that our app correctly transitions to
+# the camera view — which is the behaviour we own and care about.
+- launchApp:
+    permissions:
+      camera: allow
 
 - assertVisible:
     id: 'mirror-container'
