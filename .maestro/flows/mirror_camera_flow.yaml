@@ -1,8 +1,11 @@
 appId: com.mirrorapp.app
 ---
-# Flow: Camera view is displayed in mirror mode after permission is granted
+# Pre-grant camera permission at the OS level so this flow is independent
+# of mirror_permission_flow and always starts on the camera screen.
 - launchApp:
-    clearState: false # assumes permission already granted
+    clearState: true
+    permissions:
+      camera: allow
 
 - assertVisible:
     id: 'mirror-container'
