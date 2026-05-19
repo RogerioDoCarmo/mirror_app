@@ -1,9 +1,9 @@
 appId: com.mirrorapp.app
 ---
-# Pre-grant camera permission at the OS level so this flow is independent
-# of mirror_permission_flow and always starts on the camera screen.
+# Pre-grant camera permission at the OS level so this flow always starts
+# on the camera screen, independent of mirror_permission_flow.
+# clearState is intentionally omitted — see mirror_permission_flow.yaml.
 - launchApp:
-    clearState: true
     permissions:
       camera: allow
 

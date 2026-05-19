@@ -1,19 +1,19 @@
 appId: com.mirrorapp.app
 ---
-# Reset camera permission to undetermined so the rationale UI is always shown,
-# regardless of what previous flows (or manual runs) may have granted.
+# Reset only the OS-level camera permission to undetermined.
+# clearState is intentionally omitted: clearing app data on a dev build
+# wipes the Metro connection URL from UserDefaults, causing the Expo
+# dev client launcher to appear instead of the app. On a production /
+# preview build (CI) there is no dev client, so clearState would be safe.
 - launchApp:
-    clearState: true
     permissions:
       camera: unset
 
 - assertVisible: 'Camera access is required to use MirrorApp.'
 - tapOn: 'Grant Permission'
 
-# After tapping our button the OS shows its own camera permission dialog.
-# Tap Allow to grant access.
+# iOS system camera permission dialog — grant access.
 - tapOn: 'Allow'
 
-# Once permission is granted the app should navigate to the camera view.
 - assertVisible:
     id: 'mirror-container'
