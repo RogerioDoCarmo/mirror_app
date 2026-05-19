@@ -59,8 +59,14 @@ jobs:
           echo "Booting: $DEVICE_ID"
           xcrun simctl boot "$DEVICE_ID"
 
-      - name: Install app on simulator
-        run: xcrun simctl install booted *.app
+      - name: Extract and install app on simulator
+        run: |
+          # EAS local iOS simulator builds produce a .tar.gz archive.
+          # Extract it, then locate the .app bundle inside.
+          tar -xzf *.tar.gz
+          APP_PATH=$(find . -name "*.app" -not -path "*/node_modules/*" | head -1)
+          echo "Installing: $APP_PATH"
+          xcrun simctl install booted "$APP_PATH"
 
       - name: Run Maestro E2E flows
         run: maestro test .maestro/flows/
