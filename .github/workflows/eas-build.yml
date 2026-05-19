@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       platform:
-        description: "Platform to build"
+        description: 'Platform to build'
         required: true
-        default: "all"
+        default: 'all'
         type: choice
         options: [all, ios, android]
       submit:
-        description: "Submit to stores after build"
+        description: 'Submit to stores after build'
         required: true
         default: false
         type: boolean

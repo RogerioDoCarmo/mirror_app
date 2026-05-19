@@ -44,10 +44,7 @@ module.exports = typescriptEslint.config(
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       '@typescript-eslint/no-require-imports': 'error',
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports' },
-      ],
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     },
   },
   {
