@@ -10,15 +10,22 @@ appId: com.mirrorapp.app
 - assertVisible: 'Camera access is required to use MirrorApp.'
 - tapOn: 'Grant Permission'
 
-# iOS system permission dialog — button text varies by OS version:
-#   iOS 14+ : "Allow While Using App" / "Allow Once" / "Don't Allow"
-#   iOS ≤13  : "Allow" / "Don't Allow"
-# Each runFlow block only executes when the matching button is visible.
+# System permission dialog button text varies by platform and OS version:
+#   iOS 14+       : "Allow While Using App"
+#   iOS ≤13       : "Allow"
+#   Android 11+   : "While using the app"   (API 30+, incl. CI API 33)
+#   Android ≤10   : "Allow"
+# Each block only executes when its button is actually visible.
 - runFlow:
     when:
       visible: 'Allow While Using App'
     commands:
       - tapOn: 'Allow While Using App'
+- runFlow:
+    when:
+      visible: 'While using the app'
+    commands:
+      - tapOn: 'While using the app'
 - runFlow:
     when:
       visible: 'Allow'
