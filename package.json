@@ -11,7 +11,7 @@
     "run:ios": "expo run:ios --device",
     "build:apk": "eas build --platform android --profile preview",
     "build:ipa": "eas build --platform ios --profile production",
-    "test:e2e": "maestro test .maestro/",
+    "test:e2e": "maestro test .maestro/flows/",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
