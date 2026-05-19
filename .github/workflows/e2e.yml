@@ -47,8 +47,16 @@ jobs:
 
       - name: Boot iOS simulator
         run: |
+          # Pick the last available iPhone across all runtimes — avoids
+          # hardcoding a model name that may not exist on the runner's Xcode.
           DEVICE_ID=$(xcrun simctl list devices available --json | \
-            jq -r '.devices | to_entries[] | .value[] | select(.name | contains("iPhone 15")) | .udid' | head -1)
+            jq -r '[.devices[][] | select(.name | test("^iPhone"))] | last | .udid')
+          if [ -z "$DEVICE_ID" ] || [ "$DEVICE_ID" = "null" ]; then
+            echo "No iPhone simulator found. Available devices:"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Booting: $DEVICE_ID"
           xcrun simctl boot "$DEVICE_ID"
 
       - name: Install app on simulator
