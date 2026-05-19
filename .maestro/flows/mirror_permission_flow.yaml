@@ -1,10 +1,8 @@
 appId: com.mirrorapp.app
 ---
-# Reset only the OS-level camera permission to undetermined.
-# clearState is intentionally omitted: clearing app data on a dev build
-# wipes the Metro connection URL from UserDefaults, causing the Expo
-# dev client launcher to appear instead of the app. On a production /
-# preview build (CI) there is no dev client, so clearState would be safe.
+# Reset only the OS-level camera permission to undetermined so the rationale
+# UI is always shown, regardless of what previous flows may have granted.
+# clearState is intentionally omitted — see mirror_camera_flow.yaml comment.
 - launchApp:
     permissions:
       camera: unset
@@ -12,8 +10,20 @@ appId: com.mirrorapp.app
 - assertVisible: 'Camera access is required to use MirrorApp.'
 - tapOn: 'Grant Permission'
 
-# iOS system camera permission dialog — grant access.
-- tapOn: 'Allow'
+# iOS system permission dialog — button text varies by OS version:
+#   iOS 14+ : "Allow While Using App" / "Allow Once" / "Don't Allow"
+#   iOS ≤13  : "Allow" / "Don't Allow"
+# Each runFlow block only executes when the matching button is visible.
+- runFlow:
+    when:
+      visible: 'Allow While Using App'
+    commands:
+      - tapOn: 'Allow While Using App'
+- runFlow:
+    when:
+      visible: 'Allow'
+    commands:
+      - tapOn: 'Allow'
 
 - assertVisible:
     id: 'mirror-container'
