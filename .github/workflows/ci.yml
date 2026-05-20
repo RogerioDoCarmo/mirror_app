@@ -38,7 +38,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Unit & Integration tests with coverage
-        run: pnpm test:coverage -- --ci --forceExit
+        run: pnpm exec jest --coverage --ci --forceExit
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
