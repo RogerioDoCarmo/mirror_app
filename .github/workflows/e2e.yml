@@ -47,14 +47,37 @@ jobs:
 
       - name: Boot iOS simulator
         run: |
+          # Pick the last available iPhone across all runtimes — avoids
+          # hardcoding a model name that may not exist on the runner's Xcode.
           DEVICE_ID=$(xcrun simctl list devices available --json | \
-            jq -r '.devices | to_entries[] | .value[] | select(.name | contains("iPhone 15")) | .udid' | head -1)
+            jq -r '[.devices[][] | select(.name | test("^iPhone"))] | last | .udid')
+          if [ -z "$DEVICE_ID" ] || [ "$DEVICE_ID" = "null" ]; then
+            echo "No iPhone simulator found. Available devices:"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Booting: $DEVICE_ID"
           xcrun simctl boot "$DEVICE_ID"
+          # Open the Simulator.app GUI process — Maestro's XCTest driver
+          # requires it to be running, not just the headless simctl device.
+          open -a Simulator
+          # Block until SpringBoard is fully ready before proceeding.
+          xcrun simctl bootstatus "$DEVICE_ID" -b
 
-      - name: Install app on simulator
-        run: xcrun simctl install booted *.app
+      - name: Extract and install app on simulator
+        run: |
+          # EAS local iOS simulator builds produce a .tar.gz archive.
+          # Extract it, then locate the .app bundle inside.
+          tar -xzf *.tar.gz
+          APP_PATH=$(find . -name "*.app" -not -path "*/node_modules/*" | head -1)
+          echo "Installing: $APP_PATH"
+          xcrun simctl install booted "$APP_PATH"
 
       - name: Run Maestro E2E flows
+        env:
+          # CI runners are slower than local machines; give the XCTest
+          # driver extra time to attach to the simulator before timing out.
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: 300000
         run: maestro test .maestro/flows/
 
   e2e-android:
