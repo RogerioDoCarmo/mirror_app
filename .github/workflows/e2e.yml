@@ -58,9 +58,10 @@ jobs:
           fi
           echo "Booting: $DEVICE_ID"
           xcrun simctl boot "$DEVICE_ID"
-          # Block until the simulator is fully booted before proceeding.
-          # Without this, simctl install and Maestro's XCTest driver both
-          # fail because the SpringBoard hasn't finished starting up.
+          # Open the Simulator.app GUI process — Maestro's XCTest driver
+          # requires it to be running, not just the headless simctl device.
+          open -a Simulator
+          # Block until SpringBoard is fully ready before proceeding.
           xcrun simctl bootstatus "$DEVICE_ID" -b
 
       - name: Extract and install app on simulator
@@ -76,7 +77,7 @@ jobs:
         env:
           # CI runners are slower than local machines; give the XCTest
           # driver extra time to attach to the simulator before timing out.
-          MAESTRO_DRIVER_STARTUP_TIMEOUT: 120000
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: 300000
         run: maestro test .maestro/flows/
 
   e2e-android:
