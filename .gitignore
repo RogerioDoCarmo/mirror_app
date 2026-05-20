@@ -47,3 +47,7 @@ reports/
 
 # Store submission secrets
 google-services-key.json
+*.apk
+*.zip
+*.tar.gz
+build-*.apk
