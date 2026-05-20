@@ -15,9 +15,11 @@ export function useCamera(): UseCameraReturn {
   const cameraRef = useRef<CameraView | null>(null);
   const [isReady, setIsReady] = useState(false);
 
+  // Stryker disable ArrayDeclaration -- equivalent mutant: a static string literal dep never changes, so [] and ["value"] behave identically
   const onCameraReady = useCallback(() => {
     setIsReady(true);
   }, []);
+  // Stryker restore ArrayDeclaration
 
   return { permission, requestPermission, cameraRef, isReady, onCameraReady };
 }

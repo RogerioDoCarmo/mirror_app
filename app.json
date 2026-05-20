@@ -11,13 +11,14 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#80BBFC"
     },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.mirrorapp.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "MirrorApp uses your front camera to show you a mirror view."
+        "NSCameraUsageDescription": "MirrorApp uses your front camera to show you a mirror view.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -45,8 +46,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+        "projectId": "fb2332e5-c3f1-4016-b1ff-021e58211658"
       }
-    }
+    },
+    "owner": "rogeriodocarmo"
   }
 }
