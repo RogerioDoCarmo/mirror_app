@@ -22,18 +22,26 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^3.0.3",
     "expo": "~54.0.33",
     "expo-camera": "~17.0.10",
     "expo-dev-client": "~6.0.21",
     "expo-status-bar": "~3.0.9",
     "expo-system-ui": "~6.0.9",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-native": "0.81.5",
+    "react-native-safe-area-context": "^5.8.0"
   },
   "devDependencies": {
+    "@storybook/addon-ondevice-actions": "^10.4.4",
+    "@storybook/addon-ondevice-backgrounds": "^10.4.4",
+    "@storybook/addon-ondevice-controls": "^10.4.4",
+    "@storybook/addon-ondevice-notes": "^10.4.4",
+    "@storybook/react-native": "^10.4.4",
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/jest-runner": "^9.6.1",
     "@testing-library/react-native": "^13.3.3",

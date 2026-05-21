@@ -17,6 +17,9 @@ module.exports = typescriptEslint.config(
       'eslint.config.js',
       'jest.config.js',
       'stryker.config.json',
+      'metro.config.js',
+      'babel.config.js',
+      '.rnstorybook/**',
     ],
   },
   {
@@ -48,7 +51,7 @@ module.exports = typescriptEslint.config(
     },
   },
   {
-    files: ['**/*.test.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
+    files: ['**/*.test.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}', '**/*.stories.{ts,tsx}'],
     plugins: {
       jest: jestPlugin,
       'testing-library': testingLibraryPlugin,
