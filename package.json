@@ -23,7 +23,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "storybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start"
+    "storybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --clear"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^3.0.3",
