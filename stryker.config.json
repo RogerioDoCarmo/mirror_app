@@ -11,6 +11,8 @@
     "src/**/*.tsx",
     "!src/**/*.test.ts",
     "!src/**/*.test.tsx",
+    "!src/**/*.stories.ts",
+    "!src/**/*.stories.tsx",
     "!src/types/**"
   ],
   "thresholds": {
