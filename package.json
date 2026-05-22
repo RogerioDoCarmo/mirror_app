@@ -26,7 +26,6 @@
     "storybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --clear"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^3.0.3",
     "expo": "~54.0.33",
     "expo-camera": "~17.0.10",
     "expo-dev-client": "~6.0.21",
