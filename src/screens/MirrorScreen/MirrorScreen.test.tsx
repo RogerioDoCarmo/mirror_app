@@ -1,9 +1,17 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
+import { useExpoLocalization } from '@/adapters/expo-localization/ExpoLocalizationAdapter';
+import { LocaleProvider } from '@/application/providers/LocaleProvider';
+import type { TranslationKey } from '@/core/domain/translations';
+import { en } from '@/i18n/translations/en';
 import { MirrorScreen } from './MirrorScreen';
 
 jest.mock('@/hooks/useCamera', () => ({
   useCamera: jest.fn(),
+}));
+
+jest.mock('@/adapters/expo-localization/ExpoLocalizationAdapter', () => ({
+  useExpoLocalization: jest.fn(),
 }));
 
 jest.mock('expo-camera', () => {
@@ -17,6 +25,12 @@ jest.mock('expo-camera', () => {
 });
 
 const { useCamera } = require('@/hooks/useCamera') as { useCamera: jest.Mock };
+const mockUseExpoLocalization = jest.mocked(useExpoLocalization);
+
+const enPort = {
+  locale: 'en' as const,
+  t: (key: TranslationKey) => en[key],
+};
 
 const mockCameraRef = { current: null };
 const mockOnCameraReady = jest.fn();
@@ -29,15 +43,19 @@ const baseHookReturn = {
   requestPermission: mockRequestPermission,
 };
 
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(LocaleProvider, null, children);
+
 describe('MirrorScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseExpoLocalization.mockReturnValue(enPort);
   });
 
   it('shows a loading indicator while camera permissions are being determined', () => {
     useCamera.mockReturnValue({ ...baseHookReturn, permission: null });
 
-    render(<MirrorScreen />);
+    render(<MirrorScreen />, { wrapper });
 
     expect(screen.getByTestId('permission-loading')).toBeTruthy();
   });
@@ -48,9 +66,9 @@ describe('MirrorScreen', () => {
       permission: { granted: false, canAskAgain: true },
     });
 
-    render(<MirrorScreen />);
+    render(<MirrorScreen />, { wrapper });
 
-    expect(screen.getByText('Camera access is required to use MirrorApp.')).toBeTruthy();
+    expect(screen.getByText(en['permission.cameraRequired'])).toBeTruthy();
   });
 
   it('calls requestPermission when the grant button is pressed', () => {
@@ -59,8 +77,8 @@ describe('MirrorScreen', () => {
       permission: { granted: false, canAskAgain: true },
     });
 
-    render(<MirrorScreen />);
-    fireEvent.press(screen.getByText('Grant Permission'));
+    render(<MirrorScreen />, { wrapper });
+    fireEvent.press(screen.getByText(en['permission.grantButton']));
 
     expect(mockRequestPermission).toHaveBeenCalledTimes(1);
   });
@@ -71,7 +89,7 @@ describe('MirrorScreen', () => {
       permission: { granted: true, canAskAgain: true },
     });
 
-    render(<MirrorScreen />);
+    render(<MirrorScreen />, { wrapper });
 
     expect(screen.getByTestId('mirror-container')).toBeTruthy();
     expect(screen.getByTestId('camera-view')).toBeTruthy();
@@ -83,7 +101,7 @@ describe('MirrorScreen', () => {
       permission: { granted: false, canAskAgain: true },
     });
 
-    render(<MirrorScreen />);
+    render(<MirrorScreen />, { wrapper });
 
     expect(screen.queryByTestId('camera-view')).toBeNull();
   });

@@ -1,7 +1,27 @@
 import React from 'react';
 import { Text } from 'react-native';
 import { render, screen, fireEvent } from '@testing-library/react-native';
+import { useExpoLocalization } from '@/adapters/expo-localization/ExpoLocalizationAdapter';
+import { LocaleProvider } from '@/application/providers/LocaleProvider';
+import type { TranslationKey } from '@/core/domain/translations';
+import { en } from '@/i18n/translations/en';
 import { PermissionGate } from './PermissionGate';
+
+jest.mock('@/adapters/expo-localization/ExpoLocalizationAdapter', () => ({
+  useExpoLocalization: jest.fn(),
+}));
+
+const mockUseExpoLocalization = jest.mocked(useExpoLocalization);
+
+// Wire up a real t() backed by the English translation map so assertions on
+// actual user-visible strings remain meaningful and don't require duplication.
+const enPort = {
+  locale: 'en' as const,
+  t: (key: TranslationKey) => en[key],
+};
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(LocaleProvider, null, children);
 
 const CHILD_TEXT = 'Camera Content';
 const Child = () => <Text>{CHILD_TEXT}</Text>;
@@ -11,6 +31,7 @@ describe('PermissionGate', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseExpoLocalization.mockReturnValue(enPort);
   });
 
   describe('when permission is null (loading)', () => {
@@ -19,6 +40,7 @@ describe('PermissionGate', () => {
         <PermissionGate permission={null} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
       expect(screen.getByTestId('permission-loading')).toBeTruthy();
     });
@@ -28,6 +50,7 @@ describe('PermissionGate', () => {
         <PermissionGate permission={null} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
       expect(screen.queryByText(CHILD_TEXT)).toBeNull();
     });
@@ -41,8 +64,9 @@ describe('PermissionGate', () => {
         <PermissionGate permission={deniedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
-      expect(screen.getByText('Camera access is required to use MirrorApp.')).toBeTruthy();
+      expect(screen.getByText(en['permission.cameraRequired'])).toBeTruthy();
     });
 
     it('shows the grant permission button', () => {
@@ -50,8 +74,9 @@ describe('PermissionGate', () => {
         <PermissionGate permission={deniedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
-      expect(screen.getByText('Grant Permission')).toBeTruthy();
+      expect(screen.getByText(en['permission.grantButton'])).toBeTruthy();
     });
 
     it('calls onRequest when the grant button is pressed', () => {
@@ -59,8 +84,9 @@ describe('PermissionGate', () => {
         <PermissionGate permission={deniedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
-      fireEvent.press(screen.getByText('Grant Permission'));
+      fireEvent.press(screen.getByText(en['permission.grantButton']));
       expect(mockOnRequest).toHaveBeenCalledTimes(1);
     });
 
@@ -69,6 +95,7 @@ describe('PermissionGate', () => {
         <PermissionGate permission={deniedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
       expect(screen.queryByText(CHILD_TEXT)).toBeNull();
     });
@@ -82,8 +109,9 @@ describe('PermissionGate', () => {
         <PermissionGate permission={blockedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
-      expect(screen.getByText('Camera access is required to use MirrorApp.')).toBeTruthy();
+      expect(screen.getByText(en['permission.cameraRequired'])).toBeTruthy();
     });
 
     it('does not show the grant button', () => {
@@ -91,8 +119,9 @@ describe('PermissionGate', () => {
         <PermissionGate permission={blockedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
-      expect(screen.queryByText('Grant Permission')).toBeNull();
+      expect(screen.queryByText(en['permission.grantButton'])).toBeNull();
     });
 
     it('shows a settings guidance message', () => {
@@ -100,8 +129,9 @@ describe('PermissionGate', () => {
         <PermissionGate permission={blockedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
-      expect(screen.getByText('Please enable camera access in your device settings.')).toBeTruthy();
+      expect(screen.getByText(en['permission.openSettings'])).toBeTruthy();
     });
   });
 
@@ -113,6 +143,7 @@ describe('PermissionGate', () => {
         <PermissionGate permission={grantedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
       expect(screen.getByText(CHILD_TEXT)).toBeTruthy();
     });
@@ -122,6 +153,7 @@ describe('PermissionGate', () => {
         <PermissionGate permission={grantedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
       expect(screen.queryByTestId('permission-loading')).toBeNull();
     });
@@ -131,8 +163,9 @@ describe('PermissionGate', () => {
         <PermissionGate permission={grantedPermission} onRequest={mockOnRequest}>
           <Child />
         </PermissionGate>,
+        { wrapper },
       );
-      expect(screen.queryByText('Camera access is required to use MirrorApp.')).toBeNull();
+      expect(screen.queryByText(en['permission.cameraRequired'])).toBeNull();
     });
   });
 });

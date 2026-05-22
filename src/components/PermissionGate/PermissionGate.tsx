@@ -2,6 +2,7 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import type { PermissionState } from '@/core/domain/permission';
+import { useLocale } from '@/application/providers/LocaleProvider';
 
 /** Props accepted by the {@link PermissionGate} component. */
 type Props = {
@@ -10,7 +11,7 @@ type Props = {
    * Pass `null` while the status is still loading to show a spinner.
    */
   permission: PermissionState;
-  /** Called when the user taps "Grant Permission". */
+  /** Called when the user taps the grant-permission button. */
   onRequest: () => void;
   /** Content rendered once permission is granted. */
   children: React.ReactNode;
@@ -19,14 +20,17 @@ type Props = {
 /**
  * Guards its children behind the camera permission lifecycle.
  *
- * Renders one of four states based on `permission`:
+ * All visible strings are localised via {@link useLocale} so the component
+ * automatically reflects the user's OS language. Renders one of four states:
  *
  * - **null** → loading spinner.
- * - **denied, canAskAgain** → rationale message + "Grant Permission" button.
+ * - **denied, canAskAgain** → rationale message + grant-permission button.
  * - **denied, blocked** → rationale message + settings guidance.
  * - **granted** → renders `children`.
  */
 export function PermissionGate({ permission, onRequest, children }: Props) {
+  const { t } = useLocale();
+
   if (!permission) {
     return (
       <View style={styles.center}>
@@ -38,11 +42,15 @@ export function PermissionGate({ permission, onRequest, children }: Props) {
   if (!permission.granted) {
     return (
       <View style={styles.center}>
-        <Text style={styles.message}>Camera access is required to use MirrorApp.</Text>
+        <Text testID="permission-rationale" style={styles.message}>
+          {t('permission.cameraRequired')}
+        </Text>
         {permission.canAskAgain ? (
-          <Button label="Grant Permission" onPress={onRequest} />
+          <Button label={t('permission.grantButton')} onPress={onRequest} />
         ) : (
-          <Text style={styles.settings}>Please enable camera access in your device settings.</Text>
+          <Text testID="permission-settings" style={styles.settings}>
+            {t('permission.openSettings')}
+          </Text>
         )}
       </View>
     );
