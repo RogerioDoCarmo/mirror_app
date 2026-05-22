@@ -1,11 +1,18 @@
 const { getDefaultConfig } = require('expo/metro-config');
-const { withStorybook } = require('@storybook/react-native/metro/withStorybook');
 
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
-module.exports = withStorybook(config, {
-  // When false, Storybook is excluded from the bundle entirely
-  enabled: process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true',
-  configPath: './.rnstorybook',
-});
+// Only load the Storybook Metro plugin when explicitly enabled.
+// Importing withStorybook unconditionally pulls in storybook/internal/* at
+// Node.js require-time, which can fail in CI environments (e.g. Linux runners)
+// that don't have all the native dependencies those packages expect.
+if (process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true') {
+  const { withStorybook } = require('@storybook/react-native/metro/withStorybook');
+  module.exports = withStorybook(config, {
+    enabled: true,
+    configPath: './.rnstorybook',
+  });
+} else {
+  module.exports = config;
+}
