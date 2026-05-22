@@ -1,14 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
-
-/** Minimal permission shape consumed by {@link PermissionGate}. */
-type PermissionInfo = {
-  /** Whether camera access has been granted. */
-  granted: boolean;
-  /** Whether the OS will show the system permission prompt again if requested. */
-  canAskAgain: boolean;
-};
+import type { PermissionState } from '@/core/domain/permission';
 
 /** Props accepted by the {@link PermissionGate} component. */
 type Props = {
@@ -16,7 +9,7 @@ type Props = {
    * Current camera permission state.
    * Pass `null` while the status is still loading to show a spinner.
    */
-  permission: PermissionInfo | null;
+  permission: PermissionState;
   /** Called when the user taps "Grant Permission". */
   onRequest: () => void;
   /** Content rendered once permission is granted. */
@@ -27,7 +20,8 @@ type Props = {
  * Guards its children behind the camera permission lifecycle.
  *
  * Renders one of four states based on `permission`:
- * - **null** → loading spinner
+ *
+ * - **null** → loading spinner.
  * - **denied, canAskAgain** → rationale message + "Grant Permission" button.
  * - **denied, blocked** → rationale message + settings guidance.
  * - **granted** → renders `children`.
