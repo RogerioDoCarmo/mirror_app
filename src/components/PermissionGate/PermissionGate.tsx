@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Button, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { Button } from '@/components/Button';
 
 type PermissionInfo = {
   granted: boolean;
@@ -26,7 +27,7 @@ export function PermissionGate({ permission, onRequest, children }: Props) {
       <View style={styles.center}>
         <Text style={styles.message}>Camera access is required to use MirrorApp.</Text>
         {permission.canAskAgain ? (
-          <Button title="Grant Permission" onPress={onRequest} />
+          <Button label="Grant Permission" onPress={onRequest} />
         ) : (
           <Text style={styles.settings}>Please enable camera access in your device settings.</Text>
         )}
