@@ -14,6 +14,9 @@ const config = {
     '!src/**/index.ts',
     '!src/types/**',
     '!src/**/*.stories.{ts,tsx}',
+    // core/domain and core/ports contain only TypeScript type declarations —
+    // they are erased at compile time and have no runtime code to cover.
+    '!src/core/**',
   ],
   coverageThreshold: {
     global: {

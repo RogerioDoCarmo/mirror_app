@@ -1,7 +1,12 @@
-import type { PermissionResponse } from 'expo-camera';
+import type { PermissionState } from '@/core/domain/permission';
 
 /**
- * The resolved camera permission state returned by `useCameraPermissions`.
- * `null` while the permission status is still being determined (loading).
+ * Re-export of the domain camera permission state for convenience.
+ *
+ * Prefer importing {@link PermissionState} directly from
+ * `@/core/domain/permission` in new code. This alias exists only for
+ * backward compatibility.
+ *
+ * @deprecated Use `PermissionState` from `@/core/domain/permission` instead.
  */
-export type CameraPermission = PermissionResponse | null;
+export type CameraPermission = PermissionState;
