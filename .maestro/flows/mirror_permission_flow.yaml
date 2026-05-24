@@ -7,15 +7,15 @@ appId: com.mirrorapp.app
     permissions:
       camera: unset
 
-# CI Android emulators are ~2-3x slower than physical devices; the initial
-# permission state resolves asynchronously and took 16 s on a real device.
-# extendedWaitUntil gives up to 60 s before failing. Asserting by testID
-# (permission-rationale) rather than the English text string makes the check
-# locale-independent in case the CI device ever runs a supported locale.
+# CI runners (Android emulator and macOS iOS simulator) are significantly
+# slower than physical devices; the initial permission state resolves
+# asynchronously and took 16 s on a real device.  120 s gives CI enough
+# headroom before failing.  Asserting by testID (permission-rationale) rather
+# than the English text string makes the check locale-independent.
 - extendedWaitUntil:
     visible:
       id: 'permission-rationale'
-    timeout: 60000
+    timeout: 120000
 
 - assertVisible:
     id: 'permission-rationale'
@@ -36,7 +36,7 @@ appId: com.mirrorapp.app
 - extendedWaitUntil:
     visible:
       id: 'mirror-container'
-    timeout: 60000
+    timeout: 120000
 
 - assertVisible:
     id: 'mirror-container'
