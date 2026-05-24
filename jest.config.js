@@ -29,9 +29,12 @@ const config = {
     },
   },
   coverageReporters: ['text', 'text-summary', 'lcov', 'html'],
-  // Exclude Stryker's sandbox copies — they are managed by Stryker and should
-  // never be picked up by regular Jest runs.
-  testPathIgnorePatterns: ['/node_modules/', '/.stryker-tmp/'],
+  // Restrict test discovery to src/ so Jest never reaches .stryker-tmp/ or
+  // any other project-root directory during regular runs.  This also lets
+  // Stryker's jest-runner work correctly inside its sandbox: the sandbox root
+  // is treated as <rootDir> and <rootDir>/src contains the instrumented tests.
+  roots: ['<rootDir>/src'],
+  testPathIgnorePatterns: ['/node_modules/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
