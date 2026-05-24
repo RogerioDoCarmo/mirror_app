@@ -124,8 +124,28 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
-          target: google_apis
+          # Use the AOSP (default) image instead of google_apis.
+          # google_apis adds Play Services background processes that compete
+          # for CPU/RAM on the emulator, dramatically slowing app startup.
+          # MirrorApp uses no Google APIs so this change is safe.
+          target: default
           arch: x86_64
           script: |
             adb install *.apk
-            maestro test .maestro/flows/
+            # Stream error-level logcat to a file for post-mortem analysis;
+            # cleared first so only output from this run is captured.
+            adb logcat -c
+            adb logcat *:E > /tmp/logcat.txt &
+            LOGCAT_PID=$!
+            # Give Maestro the same generous driver-startup window as iOS.
+            MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 maestro test .maestro/flows/
+            EXIT_CODE=$?
+            kill $LOGCAT_PID 2>/dev/null || true
+            exit $EXIT_CODE
+
+      - name: Upload logcat on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-logcat
+          path: /tmp/logcat.txt
