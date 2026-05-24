@@ -7,6 +7,14 @@ appId: com.mirrorapp.app
     permissions:
       camera: allow
 
+# CI Android emulators are ~2-3x slower than physical devices.
+# extendedWaitUntil gives up to 60 s for the JS bundle to evaluate,
+# both providers to initialise, and the camera view to mount before failing.
+- extendedWaitUntil:
+    visible:
+      id: 'mirror-container'
+    timeout: 60000
+
 - assertVisible:
     id: 'mirror-container'
 
