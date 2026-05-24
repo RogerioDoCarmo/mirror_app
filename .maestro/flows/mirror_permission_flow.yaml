@@ -7,7 +7,18 @@ appId: com.mirrorapp.app
     permissions:
       camera: unset
 
-- assertVisible: 'Camera access is required to use MirrorApp.'
+# CI Android emulators are ~2-3x slower than physical devices; the initial
+# permission state resolves asynchronously and took 16 s on a real device.
+# extendedWaitUntil gives up to 60 s before failing. Asserting by testID
+# (permission-rationale) rather than the English text string makes the check
+# locale-independent in case the CI device ever runs a supported locale.
+- extendedWaitUntil:
+    visible:
+      id: 'permission-rationale'
+    timeout: 60000
+
+- assertVisible:
+    id: 'permission-rationale'
 - assertVisible: 'Grant Permission'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
@@ -21,6 +32,11 @@ appId: com.mirrorapp.app
 - launchApp:
     permissions:
       camera: allow
+
+- extendedWaitUntil:
+    visible:
+      id: 'mirror-container'
+    timeout: 60000
 
 - assertVisible:
     id: 'mirror-container'

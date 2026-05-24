@@ -14,12 +14,16 @@ import { translations } from '@/i18n/translations';
  * `getLocales()` returns an empty array.
  */
 function resolveLocale(): SupportedLocale {
-  const locales = getLocales();
-  for (const locale of locales) {
-    const code = locale.languageCode ?? '';
-    if (isSupportedLocale(code)) {
-      return code;
+  try {
+    const locales = getLocales();
+    for (const locale of locales) {
+      const code = locale.languageCode ?? '';
+      if (isSupportedLocale(code)) {
+        return code;
+      }
     }
+  } catch {
+    // Native module unavailable during JS cold-start — fall back to English.
   }
   return DEFAULT_LOCALE;
 }
