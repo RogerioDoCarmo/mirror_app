@@ -21,7 +21,23 @@ export function MirrorScreen() {
         void requestPermission();
       }}
     >
-      <View style={styles.container} testID="mirror-container">
+      {/*
+       * collapsable={false} prevents Fabric from removing this layout-only View
+       * from the native hierarchy.  Without it, testID is invisible to Maestro's
+       * UIAutomator2 / XCTest drivers on New Architecture builds.
+       *
+       * accessibilityLabel duplicates testID so Maestro can match by content-desc
+       * (Android) / accessibilityLabel (iOS) as a fallback when resource-id is not
+       * set by the Fabric renderer.  Note: accessibilityLabel is NOT paired with
+       * accessible={true} — that would group children and hide camera-view from
+       * the accessibility tree.
+       */}
+      <View
+        style={styles.container}
+        testID="mirror-container"
+        accessibilityLabel="mirror-container"
+        collapsable={false}
+      >
         <CameraView
           ref={cameraRef}
           style={styles.camera}
@@ -29,6 +45,7 @@ export function MirrorScreen() {
           mirror
           onCameraReady={onCameraReady}
           testID="camera-view"
+          accessibilityLabel="camera-view"
         />
       </View>
     </PermissionGate>

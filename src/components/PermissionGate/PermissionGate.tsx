@@ -33,22 +33,43 @@ export function PermissionGate({ permission, onRequest, children }: Props) {
 
   if (!permission) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator testID="permission-loading" size="large" color="#fff" />
+      <View style={styles.center} collapsable={false}>
+        <ActivityIndicator
+          testID="permission-loading"
+          accessibilityLabel="permission-loading"
+          size="large"
+          color="#fff"
+        />
       </View>
     );
   }
 
   if (!permission.granted) {
     return (
-      <View style={styles.center}>
-        <Text testID="permission-rationale" style={styles.message}>
+      <View style={styles.center} collapsable={false}>
+        {/*
+         * accessibilityLabel duplicates testID so Maestro can locate this element
+         * on Android New Architecture builds, where the Fabric renderer does not
+         * always propagate testID to the UIAutomator2 resource-id field.  Maestro's
+         * id: matcher falls back to content-desc (Android) / accessibilityLabel
+         * (iOS), making the assertion platform-reliable without requiring
+         * accessible={true} (which would hide child elements from the tree).
+         */}
+        <Text
+          testID="permission-rationale"
+          accessibilityLabel="permission-rationale"
+          style={styles.message}
+        >
           {t('permission.cameraRequired')}
         </Text>
         {permission.canAskAgain ? (
           <Button label={t('permission.grantButton')} onPress={onRequest} />
         ) : (
-          <Text testID="permission-settings" style={styles.settings}>
+          <Text
+            testID="permission-settings"
+            accessibilityLabel="permission-settings"
+            style={styles.settings}
+          >
             {t('permission.openSettings')}
           </Text>
         )}
