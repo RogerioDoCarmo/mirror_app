@@ -78,7 +78,10 @@ jobs:
           # CI runners are slower than local machines; give the XCTest
           # driver extra time to attach to the simulator before timing out.
           MAESTRO_DRIVER_STARTUP_TIMEOUT: 300000
-        run: maestro test .maestro/flows/
+        run: |
+          # Use the full binary path so we are not affected by whether
+          # $GITHUB_PATH was flushed before this step executed.
+          "$HOME/.maestro/bin/maestro" test .maestro/flows/
 
       - name: Capture simulator screenshot on failure
         if: failure()

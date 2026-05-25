@@ -18,11 +18,13 @@ appId: com.mirrorapp.app
 # both providers to initialise, and the camera view to mount before failing.
 - extendedWaitUntil:
     visible:
-      id: 'mirror-container'
+      label: 'mirror-container'
     timeout: 120000
 
+# label: matches content-desc (Android) / accessibilityLabel (iOS) — more
+# reliable than id: on React Native Fabric builds.
 - assertVisible:
-    id: 'mirror-container'
+    label: 'mirror-container'
 
 - assertVisible:
-    id: 'camera-view'
+    label: 'camera-view'
