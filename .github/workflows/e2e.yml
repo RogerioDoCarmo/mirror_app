@@ -38,7 +38,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build iOS app for simulator (EAS)
-        run: eas build --platform ios --profile preview --local --non-interactive
+        run: eas build --platform ios --profile e2e --local --non-interactive
 
       - name: Install Maestro
         run: |
@@ -121,7 +121,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Android APK (EAS)
-        run: eas build --platform android --profile preview --local --non-interactive
+        run: eas build --platform android --profile e2e --local --non-interactive
 
       - name: Enable KVM for emulator
         run: |
