@@ -13,15 +13,20 @@ appId: com.mirrorapp.app
 # CI runners (Android emulator and macOS iOS simulator) are significantly
 # slower than physical devices; the initial permission state resolves
 # asynchronously and took 16 s on a real device.  120 s gives CI enough
-# headroom before failing.  Asserting by testID (permission-rationale) rather
-# than the English text string makes the check locale-independent.
+# headroom before failing.
+#
+# Use label: (content-desc on Android / accessibilityLabel on iOS) instead of
+# id: (resource-id / accessibilityIdentifier) — React Native's Fabric renderer
+# does not always propagate testID to UIAutomator2's resource-id field.  Every
+# testID element in this app also carries an accessibilityLabel with the same
+# value, making label: assertions reliable across both platforms.
 - extendedWaitUntil:
     visible:
-      id: 'permission-rationale'
+      label: 'permission-rationale'
     timeout: 120000
 
 - assertVisible:
-    id: 'permission-rationale'
+    label: 'permission-rationale'
 - assertVisible: 'Grant Permission'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
@@ -38,8 +43,8 @@ appId: com.mirrorapp.app
 
 - extendedWaitUntil:
     visible:
-      id: 'mirror-container'
+      label: 'mirror-container'
     timeout: 120000
 
 - assertVisible:
-    id: 'mirror-container'
+    label: 'mirror-container'
