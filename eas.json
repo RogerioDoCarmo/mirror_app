@@ -14,6 +14,12 @@
         "simulator": true
       }
     },
+    "e2e": {
+      "extends": "preview",
+      "env": {
+        "EXPO_NO_NEW_ARCH": "1"
+      }
+    },
     "production": {
       "autoIncrement": true
     }
