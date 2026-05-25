@@ -80,6 +80,20 @@ jobs:
           MAESTRO_DRIVER_STARTUP_TIMEOUT: 300000
         run: maestro test .maestro/flows/
 
+      - name: Capture simulator screenshot on failure
+        if: failure()
+        run: xcrun simctl io booted screenshot /tmp/ios-simulator.png || true
+
+      - name: Upload iOS diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-diagnostics
+          path: |
+            /tmp/ios-simulator.png
+            screenshots/
+          if-no-files-found: ignore
+
   e2e-android:
     name: E2E — Android
     runs-on: ubuntu-latest
@@ -130,6 +144,11 @@ jobs:
           # MirrorApp uses no Google APIs so this change is safe.
           target: default
           arch: x86_64
+          # Enable virtual front and back camera so the expo-camera TurboModule
+          # can initialise successfully.  Without at least one emulated camera
+          # device the native camera module silently rejects permission-check
+          # calls, leaving useCameraPermissions() stuck at null forever.
+          emulator-options: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated -camera-front emulated'
           script: |
             adb install *.apk
             # Stream error-level logcat to a file for post-mortem analysis;
@@ -143,9 +162,19 @@ jobs:
             kill $LOGCAT_PID 2>/dev/null || true
             exit $EXIT_CODE
 
-      - name: Upload logcat on failure
+      - name: Dump UI hierarchy on failure
+        if: failure()
+        run: |
+          adb shell uiautomator dump /sdcard/window_dump.xml || true
+          adb pull /sdcard/window_dump.xml /tmp/window_dump.xml || true
+
+      - name: Upload Android diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: android-logcat
-          path: /tmp/logcat.txt
+          name: android-diagnostics
+          path: |
+            /tmp/logcat.txt
+            /tmp/window_dump.xml
+            screenshots/
+          if-no-files-found: ignore

@@ -7,6 +7,9 @@ appId: com.mirrorapp.app
     permissions:
       camera: unset
 
+# Capture the initial screen state immediately after launch for diagnostics.
+- takeScreenshot: permission-flow-initial
+
 # CI runners (Android emulator and macOS iOS simulator) are significantly
 # slower than physical devices; the initial permission state resolves
 # asynchronously and took 16 s on a real device.  120 s gives CI enough

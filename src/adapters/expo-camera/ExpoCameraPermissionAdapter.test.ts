@@ -121,4 +121,80 @@ describe('useExpoCameraPermission', () => {
 
     expect(result.current.requestPermission).toBe(first);
   });
+
+  // ── Timeout safety-net (native module hangs / silently rejects) ─────────────
+  // expo-modules-core's createPermissionHook has no try-catch around the async
+  // getCameraPermissionsAsync() call.  On headless CI emulators the rejected
+  // promise goes unhandled, rawPermission stays null forever, and the app is
+  // stuck on the loading spinner.  The 15-second timeout rescues this case.
+
+  // ── Timeout safety-net (native module hangs / silently rejects) ─────────────
+  // expo-modules-core's createPermissionHook has no try-catch around the async
+  // getCameraPermissionsAsync() call.  On headless CI emulators the rejected
+  // promise goes unhandled, rawPermission stays null forever, and the app is
+  // stuck on the loading spinner.  The 15-second timeout rescues this case.
+
+  describe('timeout safety-net when native module does not respond', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('permission remains null before the timeout elapses', () => {
+      mockUseCameraPermissions.mockReturnValue([null, mockRawRequest, jest.fn()]);
+
+      const { result } = renderHook(() => useExpoCameraPermission());
+
+      act(() => {
+        jest.advanceTimersByTime(14_999);
+      });
+
+      expect(result.current.permission).toBeNull();
+    });
+
+    it('falls back to denied-can-ask-again exactly when the timeout elapses', () => {
+      mockUseCameraPermissions.mockReturnValue([null, mockRawRequest, jest.fn()]);
+
+      const { result } = renderHook(() => useExpoCameraPermission());
+
+      expect(result.current.permission).toBeNull();
+
+      act(() => {
+        jest.advanceTimersByTime(15_000);
+      });
+
+      expect(result.current.permission).toEqual({ granted: false, canAskAgain: true });
+    });
+
+    it('uses the real permission when the native module responds before the timeout fires', () => {
+      const raw = makeRaw({
+        granted: true,
+        canAskAgain: true,
+        status: 'granted' as PermissionStatus,
+      });
+      // Simulate native module responding after a short delay (before timeout).
+      mockUseCameraPermissions
+        .mockReturnValueOnce([null, mockRawRequest, jest.fn()])
+        .mockReturnValue([raw, mockRawRequest, jest.fn()]);
+
+      const { result, rerender } = renderHook(() => useExpoCameraPermission());
+
+      expect(result.current.permission).toBeNull();
+
+      // Native module responds — trigger a re-render with the resolved value.
+      // RTN's rerender() wraps in act() internally so effects flush immediately.
+      rerender({});
+
+      // Timer cleanup runs on re-render with non-null rawPermission.
+      // Advancing past the threshold must NOT override the real permission.
+      act(() => {
+        jest.advanceTimersByTime(15_000);
+      });
+
+      expect(result.current.permission).toEqual({ granted: true, canAskAgain: true });
+    });
+  });
 });
