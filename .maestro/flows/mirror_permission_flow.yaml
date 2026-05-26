@@ -27,7 +27,12 @@ appId: com.mirrorapp.app
 
 - assertVisible:
     label: 'permission-rationale'
-- assertVisible: 'Grant Permission'
+# The Button's Pressable is an accessibility element (accessibilityRole="button"),
+# so its child <Text> is hidden from the accessibility tree on both platforms.
+# Use label: to match the Pressable's own accessibilityLabel instead of the
+# invisible inner text node.
+- assertVisible:
+    label: 'Grant Permission'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
 # Relaunch with the permission explicitly allowed without tapping the button
