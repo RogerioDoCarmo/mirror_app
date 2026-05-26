@@ -42,7 +42,10 @@ jobs:
 
       - name: Install Maestro
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          # Pin to a specific version so CI never silently picks up a breaking
+          # release.  Maestro 2.6.0 removed label: as a selector key; bump this
+          # pin deliberately after verifying the flows against a new release.
+          curl -Ls "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
       - name: Boot iOS simulator
@@ -134,7 +137,10 @@ jobs:
 
       - name: Install Maestro
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          # Pin to a specific version so CI never silently picks up a breaking
+          # release.  Maestro 2.6.0 removed label: as a selector key; bump this
+          # pin deliberately after verifying the flows against a new release.
+          curl -Ls "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
       - name: Run Android emulator + Maestro E2E flows
