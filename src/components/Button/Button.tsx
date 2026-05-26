@@ -33,6 +33,14 @@ export function Button({ label, onPress, disabled = false, testID = 'app-button'
       style={[styles.button, disabled && styles.disabled]}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
+      // Setting accessibilityRole makes this Pressable an accessibility element
+      // (isAccessibilityElement = true on iOS / importantForAccessibility on
+      // Android).  An accessibility element's children are hidden from the
+      // accessibility tree, so the inner <Text> is invisible to test drivers.
+      // Explicitly setting accessibilityLabel surfaces the label on the element
+      // itself, which lets Maestro find it via label: matching (content-desc on
+      // Android / accessibilityLabel on iOS) and also fixes screen-reader UX.
+      accessibilityLabel={label}
     >
       <Text style={styles.label}>{label}</Text>
     </Pressable>
