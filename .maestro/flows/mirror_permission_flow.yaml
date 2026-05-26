@@ -7,8 +7,32 @@ appId: com.mirrorapp.app
     permissions:
       camera: unset
 
-- assertVisible: 'Camera access is required to use MirrorApp.'
-- assertVisible: 'Grant Permission'
+# Capture the initial screen state immediately after launch for diagnostics.
+- takeScreenshot: permission-flow-initial
+
+# CI runners (Android emulator and macOS iOS simulator) are significantly
+# slower than physical devices; the initial permission state resolves
+# asynchronously and took 16 s on a real device.  120 s gives CI enough
+# headroom before failing.
+#
+# Use label: (content-desc on Android / accessibilityLabel on iOS) instead of
+# id: (resource-id / accessibilityIdentifier) — React Native's Fabric renderer
+# does not always propagate testID to UIAutomator2's resource-id field.  Every
+# testID element in this app also carries an accessibilityLabel with the same
+# value, making label: assertions reliable across both platforms.
+- extendedWaitUntil:
+    visible:
+      label: 'permission-rationale'
+    timeout: 120000
+
+- assertVisible:
+    label: 'permission-rationale'
+# The Button's Pressable is an accessibility element (accessibilityRole="button"),
+# so its child <Text> is hidden from the accessibility tree on both platforms.
+# Use label: to match the Pressable's own accessibilityLabel instead of the
+# invisible inner text node.
+- assertVisible:
+    label: 'Grant Permission'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
 # Relaunch with the permission explicitly allowed without tapping the button
@@ -22,5 +46,10 @@ appId: com.mirrorapp.app
     permissions:
       camera: allow
 
+- extendedWaitUntil:
+    visible:
+      label: 'mirror-container'
+    timeout: 120000
+
 - assertVisible:
-    id: 'mirror-container'
+    label: 'mirror-container'

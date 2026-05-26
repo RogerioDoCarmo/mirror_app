@@ -1,0 +1,6 @@
+# Disable Maestro's automatic retry-on-failure behaviour.
+# Without this, a flow that times out on its first attempt is retried once,
+# doubling the wall-clock time before CI reports the failure and making the
+# log output ambiguous (two interleaved attempt traces).
+# Each flow gets exactly one attempt; failures are reported immediately.
+disableRetries: true

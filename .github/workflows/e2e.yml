@@ -2,9 +2,9 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,7 +38,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build iOS app for simulator (EAS)
-        run: eas build --platform ios --profile preview --local --non-interactive
+        run: eas build --platform ios --profile e2e --local --non-interactive
 
       - name: Install Maestro
         run: |
@@ -78,7 +78,24 @@ jobs:
           # CI runners are slower than local machines; give the XCTest
           # driver extra time to attach to the simulator before timing out.
           MAESTRO_DRIVER_STARTUP_TIMEOUT: 300000
-        run: maestro test .maestro/flows/
+        run: |
+          # Use the full binary path so we are not affected by whether
+          # $GITHUB_PATH was flushed before this step executed.
+          "$HOME/.maestro/bin/maestro" test .maestro/flows/
+
+      - name: Capture simulator screenshot on failure
+        if: failure()
+        run: xcrun simctl io booted screenshot /tmp/ios-simulator.png || true
+
+      - name: Upload iOS diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-diagnostics
+          path: |
+            /tmp/ios-simulator.png
+            screenshots/
+          if-no-files-found: ignore
 
   e2e-android:
     name: E2E — Android
@@ -107,7 +124,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Android APK (EAS)
-        run: eas build --platform android --profile preview --local --non-interactive
+        run: eas build --platform android --profile e2e --local --non-interactive
 
       - name: Enable KVM for emulator
         run: |
@@ -124,8 +141,43 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
-          target: google_apis
+          # Use the AOSP (default) image instead of google_apis.
+          # google_apis adds Play Services background processes that compete
+          # for CPU/RAM on the emulator, dramatically slowing app startup.
+          # MirrorApp uses no Google APIs so this change is safe.
+          target: default
           arch: x86_64
+          # Enable virtual front and back camera so the expo-camera TurboModule
+          # can initialise successfully.  Without at least one emulated camera
+          # device the native camera module silently rejects permission-check
+          # calls, leaving useCameraPermissions() stuck at null forever.
+          emulator-options: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated -camera-front emulated'
           script: |
             adb install *.apk
-            maestro test .maestro/flows/
+            # Stream error-level logcat to a file for post-mortem analysis;
+            # cleared first so only output from this run is captured.
+            adb logcat -c
+            adb logcat *:E > /tmp/logcat.txt &
+            LOGCAT_PID=$!
+            # Give Maestro the same generous driver-startup window as iOS.
+            MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 maestro test .maestro/flows/
+            EXIT_CODE=$?
+            kill $LOGCAT_PID 2>/dev/null || true
+            exit $EXIT_CODE
+
+      - name: Dump UI hierarchy on failure
+        if: failure()
+        run: |
+          adb shell uiautomator dump /sdcard/window_dump.xml || true
+          adb pull /sdcard/window_dump.xml /tmp/window_dump.xml || true
+
+      - name: Upload Android diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-diagnostics
+          path: |
+            /tmp/logcat.txt
+            /tmp/window_dump.xml
+            screenshots/
+          if-no-files-found: ignore

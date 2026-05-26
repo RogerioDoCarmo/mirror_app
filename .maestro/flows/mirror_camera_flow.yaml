@@ -7,8 +7,24 @@ appId: com.mirrorapp.app
     permissions:
       camera: allow
 
+# Capture the initial screen state immediately after launch.
+# On failure this screenshot (uploaded as a CI artifact) reveals whether
+# the app rendered anything at all, which differentiates a JS crash from
+# a slow permission check.
+- takeScreenshot: camera-flow-initial
+
+# CI runners (Android emulator and macOS iOS simulator) are significantly
+# slower than physical devices.  120 s gives the JS bundle time to evaluate,
+# both providers to initialise, and the camera view to mount before failing.
+- extendedWaitUntil:
+    visible:
+      label: 'mirror-container'
+    timeout: 120000
+
+# label: matches content-desc (Android) / accessibilityLabel (iOS) — more
+# reliable than id: on React Native Fabric builds.
 - assertVisible:
-    id: 'mirror-container'
+    label: 'mirror-container'
 
 - assertVisible:
-    id: 'camera-view'
+    label: 'camera-view'
