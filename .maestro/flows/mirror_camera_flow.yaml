@@ -18,15 +18,13 @@ appId: com.mirrorapp.app
 # both providers to initialise, and the camera view to mount before failing.
 - extendedWaitUntil:
     visible:
-      accessibilityText: 'mirror-container'
+      # CameraView has accessible={true} in MirrorScreen.tsx so React Native
+      # Fabric sets importantForAccessibility="yes" (Android) / isAccessibilityElement=true
+      # (iOS), reliably exposing accessibilityLabel="camera-view" as contentDescription
+      # to UIAutomator2 / XCTest.  Maestro's text: selector finds it via the
+      # "accessibilityText" node attribute (mapped from content-desc / accessibilityLabel).
+      text: 'camera-view'
     timeout: 120000
 
-# accessibilityText: maps to contentDescription (Android) / accessibilityLabel
-# (iOS) — the Maestro 2.6.0+ canonical selector for accessibility attributes.
-# More reliable than id: on React Native Fabric builds, which does not always
-# propagate testID to UIAutomator2's resource-id field.
 - assertVisible:
-    accessibilityText: 'mirror-container'
-
-- assertVisible:
-    accessibilityText: 'camera-view'
+    text: 'camera-view'

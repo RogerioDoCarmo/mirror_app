@@ -38,6 +38,15 @@ export function MirrorScreen() {
         accessibilityLabel="mirror-container"
         collapsable={false}
       >
+        {/*
+         * accessible={true} is required in addition to accessibilityLabel so
+         * that React Native Fabric sets importantForAccessibility="yes" on
+         * Android and isAccessibilityElement=true on iOS.  Without it, Fabric
+         * does not reliably expose the contentDescription / accessibilityLabel
+         * to UIAutomator2 / XCTest, so Maestro's text: selector can not find
+         * this element.  CameraView has no interactive React children, so
+         * grouping it as a single accessible unit is safe.
+         */}
         <CameraView
           ref={cameraRef}
           style={styles.camera}
@@ -46,6 +55,7 @@ export function MirrorScreen() {
           onCameraReady={onCameraReady}
           testID="camera-view"
           accessibilityLabel="camera-view"
+          accessible={true}
         />
       </View>
     </PermissionGate>

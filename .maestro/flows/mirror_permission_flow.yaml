@@ -15,26 +15,30 @@ appId: com.mirrorapp.app
 # asynchronously and took 16 s on a real device.  120 s gives CI enough
 # headroom before failing.
 #
-# Use accessibilityText: to match accessibilityLabel / contentDescription on
-# both platforms.  In Maestro 2.6.0 the label: key was repurposed as a command
-# display annotation (CLI output label), no longer an element selector.
-# accessibilityText: is the canonical selector that maps to Android
-# contentDescription / iOS accessibilityLabel.  Every testID element in this
-# app also carries an accessibilityLabel with the same value, so
-# accessibilityText: assertions are reliable across both platforms.
+# Use text: with the element's VISIBLE TEXT content (not its accessibilityLabel
+# value).  Maestro's text: selector calls textMatches() which searches both the
+# "text" node attribute (visible text, always present for <Text> components) and
+# "accessibilityText" (contentDescription on Android / accessibilityLabel on iOS).
+# React Native Fabric does not reliably propagate accessibilityLabel to
+# contentDescription unless accessible={true} is also set, so matching via
+# visible text is the safest cross-platform strategy for text-bearing elements.
 - extendedWaitUntil:
     visible:
-      accessibilityText: 'permission-rationale'
+      # Exact string from src/i18n/translations/en.ts → permission.cameraRequired
+      text: 'Camera access is required to use MirrorApp.'
     timeout: 120000
 
 - assertVisible:
-    accessibilityText: 'permission-rationale'
-# The Button's Pressable is an accessibility element (accessibilityRole="button"),
-# so its child <Text> is hidden from the accessibility tree on both platforms.
-# Use accessibilityText: to match the Pressable's own accessibilityLabel
-# (= contentDescription on Android) instead of the invisible inner text node.
+    text: 'Camera access is required to use MirrorApp.'
+
+# The Button's Pressable has accessible={false} (default) with accessibilityRole
+# "button".  On Android UIAutomator2, the inner <Text> child is still in the
+# node tree and carries the visible text "Grant Permission", so text: matches it
+# via the "text" node attribute.  On iOS the Pressable's own XCTest label
+# (= accessibilityLabel = "Grant Permission") is matched via "accessibilityText".
 - assertVisible:
-    accessibilityText: 'Grant Permission'
+    # Exact string from src/i18n/translations/en.ts → permission.grantButton
+    text: 'Grant Permission'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
 # Relaunch with the permission explicitly allowed without tapping the button
@@ -50,8 +54,10 @@ appId: com.mirrorapp.app
 
 - extendedWaitUntil:
     visible:
-      accessibilityText: 'mirror-container'
+      # CameraView has accessible={true} so Fabric exposes contentDescription=
+      # "camera-view" to UIAutomator2 / XCTest, making text: reliable here.
+      text: 'camera-view'
     timeout: 120000
 
 - assertVisible:
-    accessibilityText: 'mirror-container'
+    text: 'camera-view'
