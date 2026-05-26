@@ -29,13 +29,13 @@
     "expo": "~54.0.33",
     "expo-camera": "~17.0.10",
     "expo-dev-client": "~6.0.21",
-    "expo-localization": "^56.0.6",
+    "expo-localization": "^17.0.8",
     "expo-status-bar": "~3.0.9",
     "expo-system-ui": "~6.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-gesture-handler": "^2.31.2",
-    "react-native-safe-area-context": "^5.8.0"
+    "react-native-gesture-handler": "^2.28.0",
+    "react-native-safe-area-context": "^5.6.2"
   },
   "devDependencies": {
     "@storybook/addon-ondevice-actions": "^10.4.4",
