@@ -15,24 +15,24 @@ appId: com.mirrorapp.app
 # asynchronously and took 16 s on a real device.  120 s gives CI enough
 # headroom before failing.
 #
-# Use label: (content-desc on Android / accessibilityLabel on iOS) instead of
-# id: (resource-id / accessibilityIdentifier) — React Native's Fabric renderer
-# does not always propagate testID to UIAutomator2's resource-id field.  Every
-# testID element in this app also carries an accessibilityLabel with the same
-# value, making label: assertions reliable across both platforms.
+# Use text: to match accessibilityLabel / contentDescription on both platforms.
+# Maestro 2.6.0 removed label: as a selector key; text: is the documented API
+# and matches visible text + contentDescription (Android) / accessibilityLabel
+# (iOS).  Every testID element in this app also carries an accessibilityLabel
+# with the same value, so text: assertions are reliable across both platforms.
 - extendedWaitUntil:
     visible:
-      label: 'permission-rationale'
+      text: 'permission-rationale'
     timeout: 120000
 
 - assertVisible:
-    label: 'permission-rationale'
+    text: 'permission-rationale'
 # The Button's Pressable is an accessibility element (accessibilityRole="button"),
 # so its child <Text> is hidden from the accessibility tree on both platforms.
-# Use label: to match the Pressable's own accessibilityLabel instead of the
-# invisible inner text node.
+# Use text: to match the Pressable's own accessibilityLabel (= contentDescription
+# on Android) instead of the invisible inner text node.
 - assertVisible:
-    label: 'Grant Permission'
+    text: 'Grant Permission'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
 # Relaunch with the permission explicitly allowed without tapping the button
@@ -48,8 +48,8 @@ appId: com.mirrorapp.app
 
 - extendedWaitUntil:
     visible:
-      label: 'mirror-container'
+      text: 'mirror-container'
     timeout: 120000
 
 - assertVisible:
-    label: 'mirror-container'
+    text: 'mirror-container'
