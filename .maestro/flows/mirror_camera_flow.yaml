@@ -18,15 +18,15 @@ appId: com.mirrorapp.app
 # both providers to initialise, and the camera view to mount before failing.
 - extendedWaitUntil:
     visible:
-      text: 'mirror-container'
+      accessibilityText: 'mirror-container'
     timeout: 120000
 
-# text: matches contentDescription (Android) / accessibilityLabel (iOS) — the
-# documented Maestro 2.6.0+ selector for accessibility attributes.  More reliable
-# than id: on React Native Fabric builds, which does not always propagate testID
-# to UIAutomator2's resource-id field.
+# accessibilityText: maps to contentDescription (Android) / accessibilityLabel
+# (iOS) — the Maestro 2.6.0+ canonical selector for accessibility attributes.
+# More reliable than id: on React Native Fabric builds, which does not always
+# propagate testID to UIAutomator2's resource-id field.
 - assertVisible:
-    text: 'mirror-container'
+    accessibilityText: 'mirror-container'
 
 - assertVisible:
-    text: 'camera-view'
+    accessibilityText: 'camera-view'

@@ -15,24 +15,26 @@ appId: com.mirrorapp.app
 # asynchronously and took 16 s on a real device.  120 s gives CI enough
 # headroom before failing.
 #
-# Use text: to match accessibilityLabel / contentDescription on both platforms.
-# Maestro 2.6.0 removed label: as a selector key; text: is the documented API
-# and matches visible text + contentDescription (Android) / accessibilityLabel
-# (iOS).  Every testID element in this app also carries an accessibilityLabel
-# with the same value, so text: assertions are reliable across both platforms.
+# Use accessibilityText: to match accessibilityLabel / contentDescription on
+# both platforms.  In Maestro 2.6.0 the label: key was repurposed as a command
+# display annotation (CLI output label), no longer an element selector.
+# accessibilityText: is the canonical selector that maps to Android
+# contentDescription / iOS accessibilityLabel.  Every testID element in this
+# app also carries an accessibilityLabel with the same value, so
+# accessibilityText: assertions are reliable across both platforms.
 - extendedWaitUntil:
     visible:
-      text: 'permission-rationale'
+      accessibilityText: 'permission-rationale'
     timeout: 120000
 
 - assertVisible:
-    text: 'permission-rationale'
+    accessibilityText: 'permission-rationale'
 # The Button's Pressable is an accessibility element (accessibilityRole="button"),
 # so its child <Text> is hidden from the accessibility tree on both platforms.
-# Use text: to match the Pressable's own accessibilityLabel (= contentDescription
-# on Android) instead of the invisible inner text node.
+# Use accessibilityText: to match the Pressable's own accessibilityLabel
+# (= contentDescription on Android) instead of the invisible inner text node.
 - assertVisible:
-    text: 'Grant Permission'
+    accessibilityText: 'Grant Permission'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
 # Relaunch with the permission explicitly allowed without tapping the button
@@ -48,8 +50,8 @@ appId: com.mirrorapp.app
 
 - extendedWaitUntil:
     visible:
-      text: 'mirror-container'
+      accessibilityText: 'mirror-container'
     timeout: 120000
 
 - assertVisible:
-    text: 'mirror-container'
+    accessibilityText: 'mirror-container'
