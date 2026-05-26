@@ -19,7 +19,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "MirrorApp uses your front camera to show you a mirror view.",
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "appleTeamId": "X37R283V2T"
     },
     "android": {
       "adaptiveIcon": {
@@ -35,6 +36,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-localization",
       [
         "expo-camera",
         {
