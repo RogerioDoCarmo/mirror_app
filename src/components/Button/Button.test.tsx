@@ -30,10 +30,7 @@ describe('Button', () => {
   it('renders with reduced opacity when disabled', () => {
     render(<Button label="Grant Permission" onPress={() => {}} disabled />);
 
-    const button = screen.getByTestId('app-button');
-    expect(button.props.style).toEqual(
-      expect.arrayContaining([expect.objectContaining({ opacity: 0.4 })]),
-    );
+    expect(screen.getByTestId('app-button')).toHaveStyle({ opacity: 0.4 });
   });
 
   it('applies the testID prop', () => {

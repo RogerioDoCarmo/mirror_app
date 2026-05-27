@@ -32,7 +32,7 @@ describe('useExpoLocalization', () => {
   it('returns "en" when the OS locale list is empty', () => {
     // getLocales() is typed as [Locale, ...Locale[]] (non-empty) but can
     // return an empty array on some platforms — cast to cover the edge case.
-    mockGetLocales.mockReturnValue([] as unknown as ReturnType<typeof getLocales>);
+    (mockGetLocales as jest.Mock).mockReturnValue([]);
 
     const { locale } = useExpoLocalization();
 
