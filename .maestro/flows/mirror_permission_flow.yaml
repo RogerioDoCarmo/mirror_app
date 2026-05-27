@@ -4,6 +4,7 @@ appId: com.mirrorapp.app
 # Launch with camera permission unset (undetermined) and verify our
 # permission-rationale UI is displayed correctly.
 - launchApp:
+    clearState: true
     permissions:
       camera: unset
 
