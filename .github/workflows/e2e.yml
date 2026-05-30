@@ -115,6 +115,11 @@ jobs:
           path: |
             /tmp/ios-simulator.png
             screenshots/
+            # Maestro's takeScreenshot writes <name>.png to the working dir;
+            # these show the screen at the moment each flow started, unlike the
+            # simctl screenshot which is captured only after the whole run ends.
+            permission-flow-initial.png
+            camera-flow-initial.png
           if-no-files-found: ignore
 
   e2e-android:
@@ -194,9 +199,11 @@ jobs:
             # Give Maestro the same generous driver-startup window as iOS.
             # Flows listed explicitly so mirror_permission_flow runs before
             # mirror_camera_flow — see the iOS step comment for rationale.
-            MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 maestro test \
-              .maestro/flows/mirror_permission_flow.yaml \
-              .maestro/flows/mirror_camera_flow.yaml
+            # NOTE: must be a SINGLE line.  The reactivecircus/android-emulator-runner
+            # action does not preserve bash "\" line-continuations inside its
+            # script block, so a multi-line command leaks a literal "\" as an
+            # argument ("Flow path does not exist: .../\").
+            MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 maestro test .maestro/flows/mirror_permission_flow.yaml .maestro/flows/mirror_camera_flow.yaml
             EXIT_CODE=$?
             kill $LOGCAT_PID 2>/dev/null || true
             exit $EXIT_CODE
@@ -216,4 +223,6 @@ jobs:
             /tmp/logcat.txt
             /tmp/window_dump.xml
             screenshots/
+            permission-flow-initial.png
+            camera-flow-initial.png
           if-no-files-found: ignore
