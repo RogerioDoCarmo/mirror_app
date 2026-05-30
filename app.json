@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Pocket Mirror",
+    "name": "Miroji",
     "slug": "mirror-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,9 +15,9 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.rogeriodocarmo.mirrorapp",
+      "bundleIdentifier": "com.rogeriodocarmo.miroji",
       "infoPlist": {
-        "NSCameraUsageDescription": "Pocket Mirror uses your front camera to show you a mirror view.",
+        "NSCameraUsageDescription": "Miroji uses your front camera to show you a mirror view.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "appleTeamId": "X37R283V2T"
@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.rogeriodocarmo.mirrorapp",
+      "package": "com.rogeriodocarmo.miroji",
       "permissions": ["android.permission.CAMERA"],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -40,7 +40,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Pocket Mirror uses your front camera to display a mirror view.",
+          "cameraPermission": "Miroji uses your front camera to display a mirror view.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }

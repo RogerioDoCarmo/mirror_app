@@ -1,5 +1,5 @@
 /**
- * BCP 47 language codes supported by Pocket Mirror.
+ * BCP 47 language codes supported by Miroji.
  *
  * When the OS reports a language that is not in this set, or when detection
  * fails entirely, the application falls back to `'en'` (English).

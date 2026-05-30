@@ -1,4 +1,4 @@
-appId: com.rogeriodocarmo.mirrorapp
+appId: com.rogeriodocarmo.miroji
 ---
 # ── State 1: permission denied ──────────────────────────────────────────────
 # Launch with camera permission unset (undetermined) and verify our
@@ -26,11 +26,11 @@ appId: com.rogeriodocarmo.mirrorapp
 - extendedWaitUntil:
     visible:
       # Exact string from src/i18n/translations/en.ts → permission.cameraRequired
-      text: 'Camera access is required to use Pocket Mirror.'
+      text: 'Camera access is required to use Miroji.'
     timeout: 120000
 
 - assertVisible:
-    text: 'Camera access is required to use Pocket Mirror.'
+    text: 'Camera access is required to use Miroji.'
 
 # The Button's Pressable has accessible={false} (default) with accessibilityRole
 # "button".  On Android UIAutomator2, the inner <Text> child is still in the
