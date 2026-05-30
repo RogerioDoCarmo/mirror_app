@@ -75,17 +75,24 @@ jobs:
           echo "Artifact: $APK"
           echo "path=$APK" >> $GITHUB_OUTPUT
 
+      # Use the Firebase CLI directly rather than a Docker-based action so the
+      # same step works on both Linux (this job) and macOS (the iOS job) —
+      # Docker container actions cannot run on macOS runners.
       - name: Upload to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-          groups: testers
-          file: ${{ steps.apk.outputs.path }}
-          releaseNotes: |
-            Branch: ${{ github.ref_name }}
-            Commit: ${{ github.sha }}
-            ${{ github.event.head_commit.message }}
+        env:
+          # Passed via env (not interpolated into the command line) so the JSON
+          # content cannot break shell quoting or leak in process listings.
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          APK_PATH: ${{ steps.apk.outputs.path }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$GOOGLE_APPLICATION_CREDENTIALS"
+          npx -y firebase-tools appdistribution:distribute "$APK_PATH" \
+            --app "$FIREBASE_APP_ID" \
+            --groups testers \
+            --release-notes "Branch: ${{ github.ref_name }} (${{ github.sha }})"
+          rm -f "$GOOGLE_APPLICATION_CREDENTIALS"
 
   distribute-ios:
     name: Distribute — iOS (ad-hoc)
@@ -133,17 +140,22 @@ jobs:
           echo "Artifact: $IPA"
           echo "path=$IPA" >> $GITHUB_OUTPUT
 
+      # Firebase CLI (not the Docker action) because Docker container actions
+      # are unsupported on macOS runners — this was the cause of the
+      # "Container action is only supported on Linux" failure.
       - name: Upload to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_IOS_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-          groups: testers
-          file: ${{ steps.ipa.outputs.path }}
-          releaseNotes: |
-            Branch: ${{ github.ref_name }}
-            Commit: ${{ github.sha }}
-            ${{ github.event.head_commit.message }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
+          IPA_PATH: ${{ steps.ipa.outputs.path }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$GOOGLE_APPLICATION_CREDENTIALS"
+          npx -y firebase-tools appdistribution:distribute "$IPA_PATH" \
+            --app "$FIREBASE_APP_ID" \
+            --groups testers \
+            --release-notes "Branch: ${{ github.ref_name }} (${{ github.sha }})"
+          rm -f "$GOOGLE_APPLICATION_CREDENTIALS"
 
       - name: Upload IPA on failure
         if: failure()
