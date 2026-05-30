@@ -16,30 +16,26 @@ appId: com.rogeriodocarmo.miroji
 # asynchronously and took 16 s on a real device.  120 s gives CI enough
 # headroom before failing.
 #
-# Use text: with the element's VISIBLE TEXT content (not its accessibilityLabel
-# value).  Maestro's text: selector calls textMatches() which searches both the
-# "text" node attribute (visible text, always present for <Text> components) and
-# "accessibilityText" (contentDescription on Android / accessibilityLabel on iOS).
-# React Native Fabric does not reliably propagate accessibilityLabel to
-# contentDescription unless accessible={true} is also set, so matching via
-# visible text is the safest cross-platform strategy for text-bearing elements.
+# Match on the element's STABLE accessibilityLabel ("permission-rationale"),
+# NOT on its visible text.  The visible text is localised via t() and the CI
+# device's locale is not guaranteed to be English, so asserting the English
+# string fails whenever the simulator/emulator runs in another language (this
+# was the actual cause of the long-standing iOS failure: camera-view, a
+# locale-independent label, passed while the localised rationale text did not).
+#
+# The rationale <Text> has accessible={true} in PermissionGate.tsx, so Fabric
+# exposes accessibilityLabel as content-desc (Android) / accessibilityLabel
+# (iOS).  Maestro's text: selector calls textMatches(), which searches the
+# "accessibilityText" node attribute — the same mechanism that makes camera-view
+# matchable below.
 - extendedWaitUntil:
     visible:
-      # Exact string from src/i18n/translations/en.ts → permission.cameraRequired
-      text: 'Camera access is required to use Miroji.'
+      # Stable accessibilityLabel from PermissionGate.tsx (locale-independent).
+      text: 'permission-rationale'
     timeout: 120000
 
 - assertVisible:
-    text: 'Camera access is required to use Miroji.'
-
-# The Button's Pressable has accessible={false} (default) with accessibilityRole
-# "button".  On Android UIAutomator2, the inner <Text> child is still in the
-# node tree and carries the visible text "Grant Permission", so text: matches it
-# via the "text" node attribute.  On iOS the Pressable's own XCTest label
-# (= accessibilityLabel = "Grant Permission") is matched via "accessibilityText".
-- assertVisible:
-    # Exact string from src/i18n/translations/en.ts → permission.grantButton
-    text: 'Grant Permission'
+    text: 'permission-rationale'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
 # Relaunch with the permission explicitly allowed without tapping the button

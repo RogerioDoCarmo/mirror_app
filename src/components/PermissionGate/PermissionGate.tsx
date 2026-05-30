@@ -48,16 +48,22 @@ export function PermissionGate({ permission, onRequest, children }: Props) {
     return (
       <View style={styles.center} collapsable={false}>
         {/*
-         * accessibilityLabel duplicates testID so Maestro can locate this element
-         * on Android New Architecture builds, where the Fabric renderer does not
-         * always propagate testID to the UIAutomator2 resource-id field.  Maestro's
-         * id: matcher falls back to content-desc (Android) / accessibilityLabel
-         * (iOS), making the assertion platform-reliable without requiring
-         * accessible={true} (which would hide child elements from the tree).
+         * accessibilityLabel is a STABLE, locale-independent identifier
+         * ("permission-rationale") whereas the visible text is localised via
+         * t().  E2E flows must match on this label, not the translated message,
+         * so the assertion does not break when the CI device runs in a non-en
+         * locale.
+         *
+         * accessible={true} forces Fabric to set importantForAccessibility="yes"
+         * (Android) / isAccessibilityElement=true (iOS) and to expose the
+         * accessibilityLabel as content-desc / accessibilityLabel — the same
+         * pattern that makes camera-view matchable by Maestro's text: selector.
+         * A <Text> has no interactive children, so grouping it is safe.
          */}
         <Text
           testID="permission-rationale"
           accessibilityLabel="permission-rationale"
+          accessible={true}
           style={styles.message}
         >
           {t('permission.cameraRequired')}
