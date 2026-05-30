@@ -117,9 +117,7 @@ describe('useExpoLocalization', () => {
 
     const { t } = useExpoLocalization();
 
-    expect(t('permission.cameraRequired')).toBe(
-      'Se requiere acceso a la cámara para usar Pocket Mirror.',
-    );
+    expect(t('permission.cameraRequired')).toBe('Se requiere acceso a la cámara para usar Miroji.');
   });
 
   it('t() returns the Japanese string for a valid key when locale is "ja"', () => {
