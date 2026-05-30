@@ -1,4 +1,4 @@
-appId: com.mirrorapp.app
+appId: com.rogeriodocarmo.mirrorapp
 ---
 # Pre-grant camera permission at the OS level so this flow always starts
 # on the camera screen, independent of mirror_permission_flow.
