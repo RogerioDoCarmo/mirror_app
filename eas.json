@@ -24,9 +24,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "REPLACE_WITH_APPLE_ID",
+        "appleId": "rogerio.carmo02@gmail.com",
         "ascAppId": "REPLACE_WITH_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "REPLACE_WITH_APPLE_TEAM_ID"
+        "appleTeamId": "X37R283V2T"
       },
       "android": {
         "serviceAccountKeyPath": "./google-services-key.json",

@@ -1,4 +1,4 @@
-appId: com.mirrorapp.app
+appId: com.rogeriodocarmo.mirrorapp
 ---
 # ── State 1: permission denied ──────────────────────────────────────────────
 # Launch with camera permission unset (undetermined) and verify our

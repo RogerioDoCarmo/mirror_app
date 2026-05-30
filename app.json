@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.mirrorapp.app",
+      "bundleIdentifier": "com.rogeriodocarmo.mirrorapp",
       "infoPlist": {
         "NSCameraUsageDescription": "MirrorApp uses your front camera to show you a mirror view.",
         "ITSAppUsesNonExemptEncryption": false
@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.mirrorapp.app",
+      "package": "com.rogeriodocarmo.mirrorapp",
       "permissions": ["android.permission.CAMERA"],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
