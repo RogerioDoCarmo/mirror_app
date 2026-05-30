@@ -30,7 +30,7 @@
     "@react-native-community/slider": "5.0.1",
     "expo": "~54.0.35",
     "expo-camera": "~17.0.10",
-    "expo-dev-client": "~6.0.21",
+    "expo-dev-client": "~56.0.18",
     "expo-localization": "^17.0.9",
     "expo-status-bar": "~3.0.9",
     "expo-system-ui": "~6.0.9",
