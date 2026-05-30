@@ -152,7 +152,7 @@ jobs:
       # Temurin 11 by default, causing a fatal build error:
       # "Android Gradle plugin requires Java 17 to run."
       - name: Setup Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
