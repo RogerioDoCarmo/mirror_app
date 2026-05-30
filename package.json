@@ -22,25 +22,38 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --clear"
   },
   "dependencies": {
-    "expo": "~54.0.33",
+    "@react-native-community/datetimepicker": "8.4.4",
+    "@react-native-community/slider": "5.0.1",
+    "expo": "~54.0.35",
     "expo-camera": "~17.0.10",
     "expo-dev-client": "~6.0.21",
+    "expo-localization": "^17.0.9",
     "expo-status-bar": "~3.0.9",
+    "expo-system-ui": "~6.0.9",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "^2.28.0",
+    "react-native-safe-area-context": "^5.6.2"
   },
   "devDependencies": {
+    "@storybook/addon-ondevice-actions": "^10.4.4",
+    "@storybook/addon-ondevice-backgrounds": "^10.4.4",
+    "@storybook/addon-ondevice-controls": "^10.4.4",
+    "@storybook/addon-ondevice-notes": "^10.4.4",
+    "@storybook/react-native": "^10.4.4",
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/jest-runner": "^9.6.1",
     "@testing-library/react-native": "^13.3.3",
-    "@types/jest": "^30.0.0",
+    "@types/jest": "^29.5.14",
     "@types/react": "~19.1.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jest": "^29.15.2",
+    "eslint-plugin-jsdoc": "^63.0.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-native": "^5.0.0",
@@ -54,5 +67,12 @@
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.59.3"
   },
-  "private": true
+  "private": true,
+  "pnpm": {
+    "overrides": {
+      "postcss": ">=8.5.10",
+      "qs": ">=6.15.2",
+      "uuid": ">=11.1.1"
+    }
+  }
 }

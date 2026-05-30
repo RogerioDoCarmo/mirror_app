@@ -2,13 +2,18 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+# Restrict the default GITHUB_TOKEN to read-only so that no job in this
+# workflow can accidentally write to the repository or create releases.
+permissions:
+  contents: read
 
 jobs:
   e2e-ios:
@@ -38,11 +43,14 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build iOS app for simulator (EAS)
-        run: eas build --platform ios --profile preview --local --non-interactive
+        run: eas build --platform ios --profile e2e --local --non-interactive
 
       - name: Install Maestro
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          # Pin to a specific version so CI never silently picks up a breaking
+          # release.  Maestro 2.6.0 removed label: as a selector key; bump this
+          # pin deliberately after verifying the flows against a new release.
+          curl -Ls "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
       - name: Boot iOS simulator
@@ -78,11 +86,40 @@ jobs:
           # CI runners are slower than local machines; give the XCTest
           # driver extra time to attach to the simulator before timing out.
           MAESTRO_DRIVER_STARTUP_TIMEOUT: 300000
-        run: maestro test .maestro/flows/
+        run: |
+          # Use the full binary path so we are not affected by whether
+          # $GITHUB_PATH was flushed before this step executed.
+          #
+          # Flows are listed explicitly in dependency order rather than
+          # using the glob form ("test .maestro/flows/"), which would run
+          # them alphabetically — camera before permission.  If the camera
+          # flow runs first it grants the permission; the subsequent
+          # "camera: unset" in the permission flow then calls
+          # "xcrun simctl privacy reset", which is unreliable on iOS
+          # simulator after a prior grant and leaves the app seeing the
+          # camera view instead of the permission screen.  Running the
+          # permission flow first avoids that reset entirely.
+          "$HOME/.maestro/bin/maestro" test \
+            .maestro/flows/mirror_permission_flow.yaml \
+            .maestro/flows/mirror_camera_flow.yaml
+
+      - name: Capture simulator screenshot on failure
+        if: failure()
+        run: xcrun simctl io booted screenshot /tmp/ios-simulator.png || true
+
+      - name: Upload iOS diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-diagnostics
+          path: |
+            /tmp/ios-simulator.png
+            screenshots/
+          if-no-files-found: ignore
 
   e2e-android:
     name: E2E — Android
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -106,8 +143,17 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # AGP (Android Gradle Plugin) requires Java 17.  ubuntu-22.04 ships
+      # Temurin 11 by default, causing a fatal build error:
+      # "Android Gradle plugin requires Java 17 to run."
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
       - name: Build Android APK (EAS)
-        run: eas build --platform android --profile preview --local --non-interactive
+        run: eas build --platform android --profile e2e --local --non-interactive
 
       - name: Enable KVM for emulator
         run: |
@@ -117,15 +163,57 @@ jobs:
 
       - name: Install Maestro
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          # Pin to a specific version so CI never silently picks up a breaking
+          # release.  Maestro 2.6.0 removed label: as a selector key; bump this
+          # pin deliberately after verifying the flows against a new release.
+          curl -Ls "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
       - name: Run Android emulator + Maestro E2E flows
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
-          target: google_apis
+          # Use the AOSP (default) image instead of google_apis.
+          # google_apis adds Play Services background processes that compete
+          # for CPU/RAM on the emulator, dramatically slowing app startup.
+          # Miroji uses no Google APIs so this change is safe.
+          target: default
           arch: x86_64
+          # Enable virtual front and back camera so the expo-camera TurboModule
+          # can initialise successfully.  Without at least one emulated camera
+          # device the native camera module silently rejects permission-check
+          # calls, leaving useCameraPermissions() stuck at null forever.
+          emulator-options: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated -camera-front emulated'
           script: |
             adb install *.apk
-            maestro test .maestro/flows/
+            # Stream error-level logcat to a file for post-mortem analysis;
+            # cleared first so only output from this run is captured.
+            adb logcat -c
+            adb logcat *:E > /tmp/logcat.txt &
+            LOGCAT_PID=$!
+            # Give Maestro the same generous driver-startup window as iOS.
+            # Flows listed explicitly so mirror_permission_flow runs before
+            # mirror_camera_flow — see the iOS step comment for rationale.
+            MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 maestro test \
+              .maestro/flows/mirror_permission_flow.yaml \
+              .maestro/flows/mirror_camera_flow.yaml
+            EXIT_CODE=$?
+            kill $LOGCAT_PID 2>/dev/null || true
+            exit $EXIT_CODE
+
+      - name: Dump UI hierarchy on failure
+        if: failure()
+        run: |
+          adb shell uiautomator dump /sdcard/window_dump.xml || true
+          adb pull /sdcard/window_dump.xml /tmp/window_dump.xml || true
+
+      - name: Upload Android diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-diagnostics
+          path: |
+            /tmp/logcat.txt
+            /tmp/window_dump.xml
+            screenshots/
+          if-no-files-found: ignore

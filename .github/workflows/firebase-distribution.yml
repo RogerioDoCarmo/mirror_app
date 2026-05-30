@@ -1,0 +1,154 @@
+name: Firebase App Distribution
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build and distribute
+        required: true
+        default: all
+        type: choice
+        options: [all, android, ios]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  distribute-android:
+    name: Distribute — Android
+    runs-on: ubuntu-latest
+    # On push events distribute both platforms; on manual dispatch honour the
+    # platform input so a developer can re-distribute a single platform quickly.
+    if: >-
+      github.event_name == 'push' ||
+      inputs.platform == 'all' ||
+      inputs.platform == 'android'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # The Android Gradle Plugin requires Java 17; ubuntu-latest ships JDK 11.
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+
+      # Builds a signed APK locally on the runner.  Firebase App Distribution
+      # requires an APK (not AAB), which is why the "firebase" profile sets
+      # buildType: "apk" in eas.json.
+      - name: Build Android APK (local)
+        run: eas build --platform android --profile firebase --local --non-interactive
+
+      - name: Find APK artifact
+        id: apk
+        run: |
+          APK=$(find . -name "*.apk" \
+            -not -path "*/node_modules/*" \
+            -not -path "*/.gradle/*" \
+            | head -1)
+          echo "Artifact: $APK"
+          echo "path=$APK" >> $GITHUB_OUTPUT
+
+      - name: Upload to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          groups: testers
+          file: ${{ steps.apk.outputs.path }}
+          releaseNotes: |
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            ${{ github.event.head_commit.message }}
+
+  distribute-ios:
+    name: Distribute — iOS (ad-hoc)
+    runs-on: macos-latest
+    if: >-
+      github.event_name == 'push' ||
+      inputs.platform == 'all' ||
+      inputs.platform == 'ios'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # Builds a signed ad-hoc IPA locally on the runner.  EAS downloads the
+      # distribution certificate and ad-hoc provisioning profile (scoped to
+      # registered tester UDIDs) from its credential store, so no manual
+      # certificate handling is required here.
+      - name: Build iOS IPA (ad-hoc, local)
+        run: eas build --platform ios --profile firebase --local --non-interactive
+
+      - name: Find IPA artifact
+        id: ipa
+        run: |
+          IPA=$(find . -name "*.ipa" \
+            -not -path "*/node_modules/*" \
+            | head -1)
+          echo "Artifact: $IPA"
+          echo "path=$IPA" >> $GITHUB_OUTPUT
+
+      - name: Upload to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_IOS_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          groups: testers
+          file: ${{ steps.ipa.outputs.path }}
+          releaseNotes: |
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            ${{ github.event.head_commit.message }}
+
+      - name: Upload IPA on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-failure
+          path: '*.ipa'
+          if-no-files-found: ignore

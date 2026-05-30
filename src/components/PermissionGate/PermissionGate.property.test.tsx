@@ -2,7 +2,25 @@ import React from 'react';
 import { View } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
 import * as fc from 'fast-check';
+import { useExpoLocalization } from '@/adapters/expo-localization/ExpoLocalizationAdapter';
+import { LocaleProvider } from '@/application/providers/LocaleProvider';
+import type { TranslationKey } from '@/core/domain/translations';
+import { en } from '@/i18n/translations/en';
 import { PermissionGate } from './PermissionGate';
+
+jest.mock('@/adapters/expo-localization/ExpoLocalizationAdapter', () => ({
+  useExpoLocalization: jest.fn(),
+}));
+
+const mockUseExpoLocalization = jest.mocked(useExpoLocalization);
+
+const enPort = {
+  locale: 'en' as const,
+  t: (key: TranslationKey) => en[key],
+};
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(LocaleProvider, null, children);
 
 const onRequest = jest.fn();
 
@@ -11,6 +29,7 @@ const TestChild = () => <View testID="pg-child" />;
 describe('PermissionGate — property tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseExpoLocalization.mockReturnValue(enPort);
   });
 
   it('always shows loading indicator (never children) when permission is null', () => {
@@ -20,6 +39,7 @@ describe('PermissionGate — property tests', () => {
           <PermissionGate permission={null} onRequest={onRequest}>
             <TestChild />
           </PermissionGate>,
+          { wrapper },
         );
 
         expect(screen.getByTestId('permission-loading')).toBeTruthy();
@@ -37,6 +57,7 @@ describe('PermissionGate — property tests', () => {
           <PermissionGate permission={{ granted: true, canAskAgain }} onRequest={onRequest}>
             <TestChild />
           </PermissionGate>,
+          { wrapper },
         );
 
         expect(screen.getByTestId('pg-child')).toBeTruthy();
@@ -54,6 +75,7 @@ describe('PermissionGate — property tests', () => {
           <PermissionGate permission={{ granted: false, canAskAgain }} onRequest={onRequest}>
             <TestChild />
           </PermissionGate>,
+          { wrapper },
         );
 
         expect(screen.queryByTestId('pg-child')).toBeNull();
@@ -70,12 +92,11 @@ describe('PermissionGate — property tests', () => {
           <PermissionGate permission={{ granted: false, canAskAgain }} onRequest={onRequest}>
             <TestChild />
           </PermissionGate>,
+          { wrapper },
         );
 
-        expect(screen.getByText('Grant Permission')).toBeTruthy();
-        expect(
-          screen.queryByText('Please enable camera access in your device settings.'),
-        ).toBeNull();
+        expect(screen.getByText(en['permission.grantButton'])).toBeTruthy();
+        expect(screen.queryByText(en['permission.openSettings'])).toBeNull();
 
         unmount();
       }),
@@ -89,12 +110,11 @@ describe('PermissionGate — property tests', () => {
           <PermissionGate permission={{ granted: false, canAskAgain }} onRequest={onRequest}>
             <TestChild />
           </PermissionGate>,
+          { wrapper },
         );
 
-        expect(
-          screen.getByText('Please enable camera access in your device settings.'),
-        ).toBeTruthy();
-        expect(screen.queryByText('Grant Permission')).toBeNull();
+        expect(screen.getByText(en['permission.openSettings'])).toBeTruthy();
+        expect(screen.queryByText(en['permission.grantButton'])).toBeNull();
 
         unmount();
       }),
