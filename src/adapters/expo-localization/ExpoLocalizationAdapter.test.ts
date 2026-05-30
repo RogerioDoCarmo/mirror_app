@@ -118,7 +118,7 @@ describe('useExpoLocalization', () => {
     const { t } = useExpoLocalization();
 
     expect(t('permission.cameraRequired')).toBe(
-      'Se requiere acceso a la cámara para usar MirrorApp.',
+      'Se requiere acceso a la cámara para usar Pocket Mirror.',
     );
   });
 

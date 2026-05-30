@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "MirrorApp",
+    "name": "Pocket Mirror",
     "slug": "mirror-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,7 +17,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.rogeriodocarmo.mirrorapp",
       "infoPlist": {
-        "NSCameraUsageDescription": "MirrorApp uses your front camera to show you a mirror view.",
+        "NSCameraUsageDescription": "Pocket Mirror uses your front camera to show you a mirror view.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "appleTeamId": "X37R283V2T"
@@ -40,7 +40,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "MirrorApp uses your front camera to display a mirror view.",
+          "cameraPermission": "Pocket Mirror uses your front camera to display a mirror view.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }

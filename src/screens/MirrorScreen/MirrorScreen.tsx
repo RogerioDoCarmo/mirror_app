@@ -5,7 +5,7 @@ import { useCamera } from '@/hooks/useCamera';
 import { PermissionGate } from '@/components/PermissionGate';
 
 /**
- * Root screen of MirrorApp.
+ * Root screen of Pocket Mirror.
  *
  * Uses the front-facing camera in mirror mode so the user sees a real-time
  * reflection of themselves. Camera permission is handled by {@link PermissionGate}:
