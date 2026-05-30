@@ -45,8 +45,10 @@ coverage/
 reports/
 .stryker-tmp/
 
-# Store submission secrets
+# Store submission and Firebase secrets
 google-services-key.json
+google-services.json
+GoogleService-Info.plist
 *.apk
 *.zip
 *.tar.gz

@@ -20,6 +20,15 @@
     },
     "production": {
       "autoIncrement": true
+    },
+    "firebase": {
+      "ios": {
+        "distribution": "internal"
+      },
+      "android": {
+        "buildType": "apk",
+        "distribution": "internal"
+      }
     }
   },
   "submit": {
