@@ -1,36 +1,32 @@
+import React from 'react';
 import { renderHook } from '@testing-library/react-native';
 import * as fc from 'fast-check';
-import { useCameraPermissions } from 'expo-camera';
-import type { PermissionResponse } from 'expo-camera';
+import { useExpoCameraPermission } from '@/adapters/expo-camera/ExpoCameraPermissionAdapter';
+import { CameraProvider } from '@/application/providers/CameraProvider';
+import type { PermissionState } from '@/core/domain/permission';
 import { useCamera } from './useCamera';
 
-jest.mock('expo-camera', () => ({
-  useCameraPermissions: jest.fn(),
+jest.mock('@/adapters/expo-camera/ExpoCameraPermissionAdapter', () => ({
+  useExpoCameraPermission: jest.fn(),
 }));
 
-const mockUseCameraPermissions = jest.mocked(useCameraPermissions);
+const mockUseExpoCameraPermission = jest.mocked(useExpoCameraPermission);
 
-// PermissionStatus is an opaque enum in expo-modules-core — cast each value to
-// PermissionResponse['status'] so the arbitrary is compatible regardless of how
-// the host environment resolves the enum. The .map() cast pins the output type
-// to PermissionResponse, working around fc.record's interaction with
-// exactOptionalPropertyTypes (which would otherwise make every field optional).
-const permissionArb: fc.Arbitrary<PermissionResponse> = fc
-  .record({
+// Arbitrary that produces any valid PermissionState (including null).
+const permissionStateArb: fc.Arbitrary<PermissionState> = fc.option(
+  fc.record({
     granted: fc.boolean(),
     canAskAgain: fc.boolean(),
-    expires: fc.constant('never'),
-    status: fc.constantFrom(
-      'granted' as PermissionResponse['status'],
-      'denied' as PermissionResponse['status'],
-      'undetermined' as PermissionResponse['status'],
-    ),
-  })
-  .map((p) => p);
-
-const nullablePermissionArb = fc.option(permissionArb, { nil: null });
+  }),
+  { nil: null },
+);
 
 const mockRequestPermission = jest.fn();
+
+// Wrap the hook under test inside CameraProvider so the adapter mock is wired
+// through context, mirroring the production setup.
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(CameraProvider, null, children);
 
 describe('useCamera — property tests', () => {
   beforeEach(() => {
@@ -39,10 +35,13 @@ describe('useCamera — property tests', () => {
 
   it('always returns isReady=false on mount, for any initial permission state', () => {
     fc.assert(
-      fc.property(nullablePermissionArb, (permission) => {
-        mockUseCameraPermissions.mockReturnValue([permission, mockRequestPermission, jest.fn()]);
+      fc.property(permissionStateArb, (permission) => {
+        mockUseExpoCameraPermission.mockReturnValue({
+          permission,
+          requestPermission: mockRequestPermission,
+        });
 
-        const { result, unmount } = renderHook(() => useCamera());
+        const { result, unmount } = renderHook(() => useCamera(), { wrapper });
 
         expect(result.current.isReady).toBe(false);
 
@@ -53,10 +52,13 @@ describe('useCamera — property tests', () => {
 
   it('always returns cameraRef.current=null on mount, for any initial permission state', () => {
     fc.assert(
-      fc.property(nullablePermissionArb, (permission) => {
-        mockUseCameraPermissions.mockReturnValue([permission, mockRequestPermission, jest.fn()]);
+      fc.property(permissionStateArb, (permission) => {
+        mockUseExpoCameraPermission.mockReturnValue({
+          permission,
+          requestPermission: mockRequestPermission,
+        });
 
-        const { result, unmount } = renderHook(() => useCamera());
+        const { result, unmount } = renderHook(() => useCamera(), { wrapper });
 
         expect(result.current.cameraRef.current).toBeNull();
 
@@ -67,10 +69,13 @@ describe('useCamera — property tests', () => {
 
   it('always returns all required keys regardless of permission state', () => {
     fc.assert(
-      fc.property(nullablePermissionArb, (permission) => {
-        mockUseCameraPermissions.mockReturnValue([permission, mockRequestPermission, jest.fn()]);
+      fc.property(permissionStateArb, (permission) => {
+        mockUseExpoCameraPermission.mockReturnValue({
+          permission,
+          requestPermission: mockRequestPermission,
+        });
 
-        const { result, unmount } = renderHook(() => useCamera());
+        const { result, unmount } = renderHook(() => useCamera(), { wrapper });
 
         expect(result.current).toHaveProperty('permission');
         expect(result.current).toHaveProperty('requestPermission');
@@ -83,13 +88,18 @@ describe('useCamera — property tests', () => {
     );
   });
 
-  it('always reflects the permission value returned by useCameraPermissions', () => {
+  it('always reflects the permission value provided by the port', () => {
     fc.assert(
-      fc.property(nullablePermissionArb, (permission) => {
-        mockUseCameraPermissions.mockReturnValue([permission, mockRequestPermission, jest.fn()]);
+      fc.property(permissionStateArb, (permission) => {
+        mockUseExpoCameraPermission.mockReturnValue({
+          permission,
+          requestPermission: mockRequestPermission,
+        });
 
-        const { result, unmount } = renderHook(() => useCamera());
+        const { result, unmount } = renderHook(() => useCamera(), { wrapper });
 
+        // The hook passes the port's permission through unchanged; reference
+        // equality holds because no transformation is applied at this layer.
         expect(result.current.permission).toBe(permission);
 
         unmount();

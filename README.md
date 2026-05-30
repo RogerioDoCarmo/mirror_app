@@ -1,4 +1,4 @@
-# MirrorApp
+# Miroji
 
 A React Native application that uses the front-facing camera to display a real-time mirror view.
 
@@ -88,24 +88,44 @@ Husky runs the following checks on every `git commit`, blocking the commit if an
 
 ---
 
-## Project Structure
+## Architecture
+
+Miroji follows a **Hexagonal (Ports & Adapters)** architecture: source dependencies point
+only inward toward a pure domain, and every third-party library (`expo-camera`,
+`expo-localization`) is isolated behind a port so it can be swapped by writing a single
+adapter. This is a deliberate showcase of SOLID principles, design patterns, and
+type-driven domain modeling on an auditable codebase.
+
+**→ See [ARCHITECTURE.md](ARCHITECTURE.md)** for the dependency diagram, the SOLID/pattern
+mapping anchored to real files, and an honest account of the trade-offs.
 
 ```
 src/
+├── core/                     # ← inward-most: no library imports
+│   ├── domain/               #   pure types (PermissionState, TranslationKey, SupportedLocale)
+│   └── ports/                #   interfaces the app depends on (ICameraPermissionPort, ILocalePort)
+├── adapters/                 # the ONLY importers of expo-* libraries
+│   ├── expo-camera/          #   ExpoCameraPermissionAdapter implements ICameraPermissionPort
+│   └── expo-localization/    #   ExpoLocalizationAdapter implements ILocalePort
+├── application/
+│   └── providers/            # dependency injection via React Context (CameraProvider, LocaleProvider)
 ├── components/
-│   └── PermissionGate/       # Handles loading / denied / blocked / granted camera permission states
-├── screens/
-│   └── MirrorScreen/         # Front-facing camera rendered in mirror mode
+│   ├── Button/               # reusable accessible pressable
+│   └── PermissionGate/       # loading / denied / blocked / granted permission states
 ├── hooks/
-│   └── useCamera/            # Encapsulates expo-camera permission lifecycle and camera ref
-└── types/                    # Shared TypeScript types
+│   └── useCamera/            # facade over the permission lifecycle + camera ref + ready state
+├── screens/
+│   └── MirrorScreen/         # front-facing camera rendered in mirror mode
+├── i18n/translations/        # en · pt · es · ja string maps (completeness type-enforced)
+└── types/                    # shared TypeScript types
 
 .github/workflows/
-├── ci.yml                    # Lint + typecheck + unit tests + mutation tests (on every PR)
+├── ci.yml                    # lint + typecheck + unit tests + mutation tests (every PR)
 ├── e2e.yml                   # Maestro flows on iOS simulator and Android emulator
-└── eas-build.yml             # EAS build + store submission (on push to main)
+├── firebase-distribution.yml # beta builds to Firebase App Distribution (push to develop)
+└── eas-build.yml             # EAS build + store submission (push to main)
 
-.maestro/flows/               # End-to-end test flows (YAML)
+.maestro/flows/               # end-to-end test flows (YAML)
 ```
 
 ---
