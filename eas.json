@@ -1,7 +1,8 @@
 {
   "cli": {
     "version": ">= 16.0.0",
-    "promptToConfigurePushNotifications": false
+    "promptToConfigurePushNotifications": false,
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -14,16 +15,28 @@
         "simulator": true
       }
     },
+    "e2e": {
+      "extends": "preview"
+    },
     "production": {
       "autoIncrement": true
+    },
+    "firebase": {
+      "ios": {
+        "distribution": "internal"
+      },
+      "android": {
+        "buildType": "apk",
+        "distribution": "internal"
+      }
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "appleId": "REPLACE_WITH_APPLE_ID",
-        "ascAppId": "REPLACE_WITH_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "REPLACE_WITH_APPLE_TEAM_ID"
+        "appleId": "rogerio.carmo02@gmail.com",
+        "ascAppId": "6774924907",
+        "appleTeamId": "X37R283V2T"
       },
       "android": {
         "serviceAccountKeyPath": "./google-services-key.json",

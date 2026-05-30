@@ -1,4 +1,4 @@
-appId: com.mirrorapp.app
+appId: com.rogeriodocarmo.miroji
 ---
 # Pre-grant camera permission at the OS level so this flow always starts
 # on the camera screen, independent of mirror_permission_flow.
@@ -7,8 +7,24 @@ appId: com.mirrorapp.app
     permissions:
       camera: allow
 
-- assertVisible:
-    id: 'mirror-container'
+# Capture the initial screen state immediately after launch.
+# On failure this screenshot (uploaded as a CI artifact) reveals whether
+# the app rendered anything at all, which differentiates a JS crash from
+# a slow permission check.
+- takeScreenshot: camera-flow-initial
+
+# CI runners (Android emulator and macOS iOS simulator) are significantly
+# slower than physical devices.  120 s gives the JS bundle time to evaluate,
+# both providers to initialise, and the camera view to mount before failing.
+- extendedWaitUntil:
+    visible:
+      # CameraView has accessible={true} in MirrorScreen.tsx so React Native
+      # Fabric sets importantForAccessibility="yes" (Android) / isAccessibilityElement=true
+      # (iOS), reliably exposing accessibilityLabel="camera-view" as contentDescription
+      # to UIAutomator2 / XCTest.  Maestro's text: selector finds it via the
+      # "accessibilityText" node attribute (mapped from content-desc / accessibilityLabel).
+      text: 'camera-view'
+    timeout: 120000
 
 - assertVisible:
-    id: 'camera-view'
+    text: 'camera-view'

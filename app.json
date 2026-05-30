@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "MirrorApp",
+    "name": "Miroji",
     "slug": "mirror-app",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "mirrorapp",
@@ -15,18 +15,19 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.mirrorapp.app",
+      "bundleIdentifier": "com.rogeriodocarmo.miroji",
       "infoPlist": {
-        "NSCameraUsageDescription": "MirrorApp uses your front camera to show you a mirror view.",
+        "NSCameraUsageDescription": "Miroji uses your front camera to show you a mirror view.",
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "appleTeamId": "X37R283V2T"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.mirrorapp.app",
+      "package": "com.rogeriodocarmo.miroji",
       "permissions": ["android.permission.CAMERA"],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -35,14 +36,16 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-localization",
       [
         "expo-camera",
         {
-          "cameraPermission": "MirrorApp uses your front camera to display a mirror view.",
+          "cameraPermission": "Miroji uses your front camera to display a mirror view.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "extra": {
       "eas": {

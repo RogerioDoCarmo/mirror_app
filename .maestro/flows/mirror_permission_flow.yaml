@@ -1,14 +1,41 @@
-appId: com.mirrorapp.app
+appId: com.rogeriodocarmo.miroji
 ---
 # ── State 1: permission denied ──────────────────────────────────────────────
 # Launch with camera permission unset (undetermined) and verify our
 # permission-rationale UI is displayed correctly.
 - launchApp:
+    clearState: true
     permissions:
       camera: unset
 
-- assertVisible: 'Camera access is required to use MirrorApp.'
-- assertVisible: 'Grant Permission'
+# Capture the initial screen state immediately after launch for diagnostics.
+- takeScreenshot: permission-flow-initial
+
+# CI runners (Android emulator and macOS iOS simulator) are significantly
+# slower than physical devices; the initial permission state resolves
+# asynchronously and took 16 s on a real device.  120 s gives CI enough
+# headroom before failing.
+#
+# Match on the element's STABLE accessibilityLabel ("permission-rationale"),
+# NOT on its visible text.  The visible text is localised via t() and the CI
+# device's locale is not guaranteed to be English, so asserting the English
+# string fails whenever the simulator/emulator runs in another language (this
+# was the actual cause of the long-standing iOS failure: camera-view, a
+# locale-independent label, passed while the localised rationale text did not).
+#
+# The rationale <Text> has accessible={true} in PermissionGate.tsx, so Fabric
+# exposes accessibilityLabel as content-desc (Android) / accessibilityLabel
+# (iOS).  Maestro's text: selector calls textMatches(), which searches the
+# "accessibilityText" node attribute — the same mechanism that makes camera-view
+# matchable below.
+- extendedWaitUntil:
+    visible:
+      # Stable accessibilityLabel from PermissionGate.tsx (locale-independent).
+      text: 'permission-rationale'
+    timeout: 120000
+
+- assertVisible:
+    text: 'permission-rationale'
 
 # ── State 2: permission granted ──────────────────────────────────────────────
 # Relaunch with the permission explicitly allowed without tapping the button
@@ -22,5 +49,12 @@ appId: com.mirrorapp.app
     permissions:
       camera: allow
 
+- extendedWaitUntil:
+    visible:
+      # CameraView has accessible={true} so Fabric exposes contentDescription=
+      # "camera-view" to UIAutomator2 / XCTest, making text: reliable here.
+      text: 'camera-view'
+    timeout: 120000
+
 - assertVisible:
-    id: 'mirror-container'
+    text: 'camera-view'

@@ -6,6 +6,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "exactOptionalPropertyTypes": true,
+    "types": ["jest", "react"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
