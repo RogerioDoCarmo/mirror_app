@@ -46,7 +46,7 @@ jobs:
         run: pnpm exec jest --coverage --ci --forceExit
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage
@@ -79,7 +79,7 @@ jobs:
         run: pnpm mutation
 
       - name: Upload mutation report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: mutation-report
