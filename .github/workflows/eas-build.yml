@@ -21,6 +21,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Restrict the default GITHUB_TOKEN to read-only so that no job in this
+# workflow can accidentally write to the repository or create releases.
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build (${{ inputs.platform || 'all' }})
