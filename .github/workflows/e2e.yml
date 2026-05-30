@@ -171,7 +171,7 @@ jobs:
           # Use the AOSP (default) image instead of google_apis.
           # google_apis adds Play Services background processes that compete
           # for CPU/RAM on the emulator, dramatically slowing app startup.
-          # MirrorApp uses no Google APIs so this change is safe.
+          # Pocket Mirror uses no Google APIs so this change is safe.
           target: default
           arch: x86_64
           # Enable virtual front and back camera so the expo-camera TurboModule
