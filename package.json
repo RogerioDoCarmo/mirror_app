@@ -26,10 +26,12 @@
     "storybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --clear"
   },
   "dependencies": {
-    "expo": "~54.0.33",
+    "@react-native-community/datetimepicker": "8.4.4",
+    "@react-native-community/slider": "5.0.1",
+    "expo": "~54.0.35",
     "expo-camera": "~17.0.10",
     "expo-dev-client": "~6.0.21",
-    "expo-localization": "^17.0.8",
+    "expo-localization": "^17.0.9",
     "expo-status-bar": "~3.0.9",
     "expo-system-ui": "~6.0.9",
     "react": "19.1.0",
@@ -46,7 +48,7 @@
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/jest-runner": "^9.6.1",
     "@testing-library/react-native": "^13.3.3",
-    "@types/jest": "^30.0.0",
+    "@types/jest": "^29.5.14",
     "@types/react": "~19.1.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
