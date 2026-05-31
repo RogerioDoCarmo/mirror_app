@@ -26,8 +26,8 @@
     "storybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --clear"
   },
   "dependencies": {
-    "@react-native-community/datetimepicker": "8.4.4",
-    "@react-native-community/slider": "5.0.1",
+    "@react-native-community/datetimepicker": "9.1.0",
+    "@react-native-community/slider": "5.2.0",
     "expo": "~54.0.35",
     "expo-camera": "~17.0.10",
     "expo-dev-client": "~6.0.21",
@@ -48,7 +48,7 @@
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/jest-runner": "^9.6.1",
     "@testing-library/react-native": "^13.3.3",
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
@@ -60,12 +60,12 @@
     "eslint-plugin-testing-library": "^7.16.2",
     "fast-check": "^4.8.0",
     "husky": "^9.1.7",
-    "jest-expo": "^54.0.17",
-    "lint-staged": "^17.0.6",
+    "jest-expo": "^56.0.4",
+    "lint-staged": "^17.0.7",
     "prettier": "^3.8.3",
     "react-test-renderer": "19.1.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.59.3"
+    "typescript-eslint": "^8.60.0"
   },
   "private": true,
   "pnpm": {
