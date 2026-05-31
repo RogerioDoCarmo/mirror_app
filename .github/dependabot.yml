@@ -1,18 +1,49 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# Dependabot configuration.
+# Docs: https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# NOTE: Dependabot always reads this file from the repository's DEFAULT branch
+# (main). `target-branch: develop` then makes it open its PRs against develop,
+# so dependency updates flow through Git Flow (feature/dependabot -> develop ->
+# main) instead of landing directly on main.
 
 version: 2
 updates:
-  # Keep npm/pnpm dependencies up to date
-  - package-ecosystem: "npm"
-    directory: "/"
+  # ── npm / pnpm dependencies ────────────────────────────────────────────────
+  - package-ecosystem: 'npm'
+    directory: '/'
+    target-branch: 'develop'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    # Expo SDK 54 curates the versions of its own packages AND the React /
+    # React Native native-module ecosystem (its "bundled native modules").
+    # Those must be upgraded together via `expo install` when bumping the SDK —
+    # never piecemeal by Dependabot. Bumping them individually breaks the build:
+    # e.g. expo-localization@56, react-native-safe-area-context@5.8, and
+    # react-native-gesture-handler@3 are all incompatible with SDK 54.
+    # Verify with `npx expo install --check`.
+    ignore:
+      - dependency-name: 'expo'
+      - dependency-name: 'expo-*'
+      - dependency-name: 'react'
+      - dependency-name: 'react-dom'
+      - dependency-name: 'react-native'
+      - dependency-name: 'react-native-*'
+      - dependency-name: 'react-test-renderer'
+      - dependency-name: '@types/react'
+    # Collapse the remaining (dev-tooling) updates into a single PR to cut noise.
+    groups:
+      npm-dev-dependencies:
+        patterns:
+          - '*'
 
-  # Keep GitHub Actions versions up to date
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  # ── GitHub Actions ─────────────────────────────────────────────────────────
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    target-branch: 'develop'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
+    groups:
+      github-actions:
+        patterns:
+          - '*'
