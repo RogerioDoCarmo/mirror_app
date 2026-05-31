@@ -16,12 +16,13 @@ updates:
       interval: 'weekly'
     open-pull-requests-limit: 5
     # Expo SDK 54 curates the versions of its own packages AND the React /
-    # React Native native-module ecosystem (its "bundled native modules").
-    # Those must be upgraded together via `expo install` when bumping the SDK —
-    # never piecemeal by Dependabot. Bumping them individually breaks the build:
-    # e.g. expo-localization@56, react-native-safe-area-context@5.8, and
-    # react-native-gesture-handler@3 are all incompatible with SDK 54.
-    # Verify with `npx expo install --check`.
+    # React Native native-module ecosystem (its "bundled native modules") plus
+    # the SDK-coupled test preset. Those must be upgraded together via
+    # `expo install` when bumping the SDK — never piecemeal by Dependabot.
+    # Bumping them individually breaks the build: e.g. expo-localization@56,
+    # react-native-safe-area-context@5.8, react-native-gesture-handler@3,
+    # @react-native-community/datetimepicker@9, and jest-expo@56 are all
+    # incompatible with SDK 54. Verify with `npx expo install --check`.
     ignore:
       - dependency-name: 'expo'
       - dependency-name: 'expo-*'
@@ -29,8 +30,15 @@ updates:
       - dependency-name: 'react-dom'
       - dependency-name: 'react-native'
       - dependency-name: 'react-native-*'
+      # Scoped community native modules — NOT matched by the react-native-*
+      # pattern above, so they need their own entry.
+      - dependency-name: '@react-native-community/*'
       - dependency-name: 'react-test-renderer'
+      # jest-expo is version-locked to the SDK (jest-expo@54 = SDK 54); @types/*
+      # for SDK-managed libs must track the SDK's jest/react versions.
+      - dependency-name: 'jest-expo'
       - dependency-name: '@types/react'
+      - dependency-name: '@types/jest'
       # Pin ESLint to v9: eslint-plugin-react@7.x calls context.getFilename(),
       # which ESLint 10 removed ("getFilename is not a function"). Block only the
       # major bump so 9.x minors/patches still flow; lift this once
