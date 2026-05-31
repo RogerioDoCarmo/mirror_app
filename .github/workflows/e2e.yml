@@ -93,9 +93,6 @@ jobs:
           # driver extra time to attach to the simulator before timing out.
           MAESTRO_DRIVER_STARTUP_TIMEOUT: 300000
         run: |
-          # Use the full binary path so we are not affected by whether
-          # $GITHUB_PATH was flushed before this step executed.
-          #
           # Flows are listed explicitly in dependency order rather than
           # using the glob form ("test .maestro/flows/"), which would run
           # them alphabetically — camera before permission.  If the camera
@@ -105,9 +102,24 @@ jobs:
           # simulator after a prior grant and leaves the app seeing the
           # camera view instead of the permission screen.  Running the
           # permission flow first avoids that reset entirely.
-          "$HOME/.maestro/bin/maestro" test \
-            .maestro/flows/mirror_permission_flow.yaml \
-            .maestro/flows/mirror_camera_flow.yaml
+          #
+          # Bounded retry: the expo-camera module intermittently crashes the app
+          # on the headless iOS simulator (no real camera hardware), failing
+          # mirror_camera_flow ~1 in N runs even though the same build passes on
+          # devices and on Android. A second attempt absorbs that flake without
+          # masking a genuine failure (which fails both attempts). The full
+          # binary path avoids depending on whether $GITHUB_PATH was flushed.
+          attempts=2
+          for i in $(seq 1 "$attempts"); do
+            echo "── Maestro attempt $i/$attempts ──"
+            "$HOME/.maestro/bin/maestro" test \
+              .maestro/flows/mirror_permission_flow.yaml \
+              .maestro/flows/mirror_camera_flow.yaml && exit 0
+            code=$?
+            echo "Attempt $i failed (exit $code)."
+          done
+          echo "All $attempts attempts failed."
+          exit "$code"
 
       - name: Capture simulator screenshot on failure
         if: failure()

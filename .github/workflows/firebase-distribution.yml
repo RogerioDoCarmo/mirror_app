@@ -20,15 +20,53 @@ permissions:
   contents: read
 
 jobs:
+  # Gate distribution on a package-version bump. A plain push to develop (e.g.
+  # merging a CI/config/docs PR) must NOT create a new Firebase release — only
+  # merges that bump "version" in package.json should. This prevents the
+  # duplicate same-version releases that came from distributing on every push.
+  check-version:
+    name: Check for version bump
+    runs-on: ubuntu-latest
+    outputs:
+      bumped: ${{ steps.check.outputs.bumped }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Need history so we can read package.json at the previous commit.
+          fetch-depth: 0
+      - name: Compare package.json version against the previous commit
+        id: check
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          CURRENT=$(jq -r '.version' package.json)
+          # Manual dispatch always distributes the current version.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual dispatch — distributing $CURRENT."
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PREVIOUS=$(git show "$BEFORE:package.json" 2>/dev/null | jq -r '.version' || echo "")
+          echo "Previous: ${PREVIOUS:-<none>} | Current: $CURRENT"
+          if [ -n "$PREVIOUS" ] && [ "$CURRENT" != "$PREVIOUS" ]; then
+            echo "Version bumped $PREVIOUS -> $CURRENT; distributing."
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No package version change; skipping distribution."
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+          fi
+
   distribute-android:
     name: Distribute — Android
+    needs: check-version
     runs-on: ubuntu-latest
-    # On push events distribute both platforms; on manual dispatch honour the
-    # platform input so a developer can re-distribute a single platform quickly.
+    # Only when the version bumped; on manual dispatch honour the platform input.
     if: >-
-      github.event_name == 'push' ||
+      needs.check-version.outputs.bumped == 'true' &&
+      (github.event_name == 'push' ||
       inputs.platform == 'all' ||
-      inputs.platform == 'android'
+      inputs.platform == 'android')
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -96,11 +134,13 @@ jobs:
 
   distribute-ios:
     name: Distribute — iOS (ad-hoc)
+    needs: check-version
     runs-on: macos-latest
     if: >-
-      github.event_name == 'push' ||
+      needs.check-version.outputs.bumped == 'true' &&
+      (github.event_name == 'push' ||
       inputs.platform == 'all' ||
-      inputs.platform == 'ios'
+      inputs.platform == 'ios')
     steps:
       - name: Checkout
         uses: actions/checkout@v6
