@@ -37,6 +37,12 @@ updates:
       # eslint-plugin-react supports ESLint 10, then upgrade deliberately.
       - dependency-name: 'eslint'
         update-types: ['version-update:semver-major']
+      # Pin TypeScript to the 5.x line Expo SDK 54 expects (~5.9). The 6.0 major
+      # conflicts with the SDK's bundled type definitions and toolchain; block
+      # only the major so 5.x updates still flow. Bump deliberately on an SDK
+      # upgrade.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
     # Collapse the remaining (dev-tooling) updates into a single PR to cut noise.
     groups:
       npm-dev-dependencies:
