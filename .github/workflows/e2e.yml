@@ -19,12 +19,18 @@ jobs:
   e2e-ios:
     name: E2E — iOS
     runs-on: macos-latest
+    # Dependabot PRs cannot access repository secrets (EXPO_TOKEN), so the EAS
+    # build step would always fail. Skip E2E for them — it still runs with
+    # secrets on the push to develop after the PR merges. A skipped required
+    # check is treated as passing by branch protection, so this does not block
+    # the PR; it just shows "skipped" instead of a misleading red failure.
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -125,12 +131,14 @@ jobs:
   e2e-android:
     name: E2E — Android
     runs-on: ubuntu-22.04
+    # See the iOS job: Dependabot PRs lack EXPO_TOKEN, so skip E2E for them.
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
