@@ -6,6 +6,9 @@ on:
 
 jobs:
   assign:
+    # Dependabot's bot account can't be added as an assignee (and the token is
+    # read-only on Dependabot PRs), so skip auto-assign for it.
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
