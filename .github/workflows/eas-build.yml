@@ -58,8 +58,24 @@ jobs:
           PLATFORM="${{ inputs.platform || 'all' }}"
           eas build --platform "$PLATFORM" --profile production --non-interactive
 
+      # Store submission is OPT-IN and MANUAL only — never on a push to main.
+      # Auto-submitting to the App Store / Play on every release merge is both
+      # undesirable (a store submission for a CI/config-only change) and was
+      # failing every time, because eas.json points the Android submit at
+      # ./google-services-key.json, which is gitignored and absent in CI.
+      # To ship: run this workflow via "Run workflow" with submit = true, and
+      # set the two secrets below.
       - name: Submit to stores
-        if: ${{ inputs.submit == 'true' || github.event_name == 'push' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.submit == 'true' }}
+        env:
+          # Base64-free raw JSON of the Google Play service account key.
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          # App-specific password for the Apple ID used in eas.json submit config.
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
         run: |
           PLATFORM="${{ inputs.platform || 'all' }}"
+          # Materialise the Android key (path referenced by eas.json) only for
+          # the duration of the submit; remove it on exit regardless of outcome.
+          printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > ./google-services-key.json
+          trap 'rm -f ./google-services-key.json' EXIT
           eas submit --platform "$PLATFORM" --non-interactive --latest
