@@ -51,6 +51,12 @@ updates:
       # upgrade.
       - dependency-name: 'typescript'
         update-types: ['version-update:semver-major']
+      # Pin @testing-library/react-native to v13. v14 changed renderHook's result
+      # typing so `result.current` resolves to an unresolved/any type, tripping
+      # the strict @typescript-eslint/no-unsafe-* rules in the hook tests. Block
+      # only the major; upgrade deliberately when migrating those tests.
+      - dependency-name: '@testing-library/react-native'
+        update-types: ['version-update:semver-major']
     # Collapse the remaining (dev-tooling) updates into a single PR to cut noise.
     groups:
       npm-dev-dependencies:
