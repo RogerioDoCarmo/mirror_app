@@ -2,7 +2,7 @@
   "expo": {
     "name": "Miroji",
     "slug": "mirror-app",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "mirrorapp",
@@ -25,7 +25,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundImage": "./assets/adaptive-icon-background.png",
+        "backgroundColor": "#6FB0FA"
       },
       "package": "com.rogeriodocarmo.miroji",
       "permissions": ["android.permission.CAMERA"],
