@@ -25,7 +25,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundImage": "./assets/adaptive-icon-background.png",
+        "backgroundColor": "#6FB0FA"
       },
       "package": "com.rogeriodocarmo.miroji",
       "permissions": ["android.permission.CAMERA"],
