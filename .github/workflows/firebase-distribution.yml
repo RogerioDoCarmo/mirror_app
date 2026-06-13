@@ -12,9 +12,17 @@ on:
         type: choice
         options: [all, android, ios]
 
+# Do NOT cancel in-progress distributions. A version-bump merge to develop
+# starts a distribution; if another push lands seconds later (e.g. "Update
+# branch" on an open release PR, which pushes a merge commit), cancel-in-progress
+# would kill the bump's run before it even evaluates the version gate — so the
+# new version silently never reaches testers (this happened to 1.2.5). With
+# cancel-in-progress: false, a later push queues behind the bump run instead of
+# killing it: the bump run completes and distributes, and the follow-up run then
+# runs the gate and correctly skips (no version change).
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
