@@ -1,0 +1,59 @@
+name: Chromatic
+
+# Builds the web Storybook and publishes it to Chromatic for visual
+# regression testing and a hosted, shareable Storybook. The on-device
+# React Native Storybook is unaffected — Chromatic snapshots the web build
+# produced by `pnpm build-storybook` (@storybook/react-native-web-vite).
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: chromatic-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  chromatic:
+    name: Chromatic
+    runs-on: ubuntu-latest
+    # Dependabot PRs run without repository secrets, so the project token
+    # would be empty — skip them (same pattern as ci.yml / e2e.yml).
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Chromatic needs full git history to find the baseline build.
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish to Chromatic
+        uses: chromaui/action@v17
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          buildScriptName: build-storybook
+          # Don't fail CI on visual diffs — review/accept baselines in the
+          # Chromatic UI (consistent with the repo's non-blocking quality
+          # gates). Flip to false later to make UI changes block merges.
+          exitZeroOnChanges: true
+          # TurboSnap: only re-snapshot stories whose code actually changed,
+          # to conserve the monthly snapshot quota.
+          onlyChanged: true
