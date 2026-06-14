@@ -21,6 +21,8 @@ module.exports = typescriptEslint.config(
       'metro.config.js',
       'babel.config.js',
       '.rnstorybook/**',
+      '.storybook/**',
+      'storybook-static/**',
     ],
   },
   {

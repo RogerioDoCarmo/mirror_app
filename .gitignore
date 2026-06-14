@@ -53,3 +53,8 @@ GoogleService-Info.plist
 *.zip
 *.tar.gz
 build-*.apk
+
+# Storybook web build (Chromatic)
+storybook-static/
+*storybook.log
+chromatic.log
