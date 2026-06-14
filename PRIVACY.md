@@ -41,7 +41,7 @@ If this policy changes, the updated version will be posted at the same URL with 
 
 ## 9. Contact
 
-Questions about this policy? Contact <rogerio.carmo02@gmail.com>.
+Questions about this policy? Contact <contact@rogeriodocarmo.com>.
 
 ---
 
