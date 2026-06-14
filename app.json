@@ -2,7 +2,7 @@
   "expo": {
     "name": "Miroji",
     "slug": "mirror-app",
-    "version": "1.2.5",
+    "version": "1.2.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "mirrorapp",
@@ -20,7 +20,7 @@
         "NSCameraUsageDescription": "Miroji uses your front camera to show you a mirror view.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "appleTeamId": "X37R283V2T"
+      "appleTeamId": "MJ8B2UX599"
     },
     "android": {
       "adaptiveIcon": {
