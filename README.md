@@ -1,5 +1,8 @@
 # Miroji
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=coverage)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
+
 A React Native application that uses the front-facing camera to display a real-time mirror view.
 
 The app's functionality is intentionally simple. The focus of this project is **engineering quality**: every decision — from folder structure to CI/CD — follows professional-grade standards that reflect how production mobile applications are built and shipped.
