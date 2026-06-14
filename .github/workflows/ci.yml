@@ -84,3 +84,38 @@ jobs:
         with:
           name: mutation-report
           path: reports/
+
+  sonar:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    # Dependabot PRs run without access to repository secrets, so the scan
+    # would fail on a missing SONAR_TOKEN — skip them (same as e2e.yml).
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Full history lets SonarCloud assign git blame and compute the
+          # "new code" period accurately; shallow clones degrade both.
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Tests with coverage
+        run: pnpm exec jest --coverage --ci --forceExit
+
+      - name: SonarCloud scan
+        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
