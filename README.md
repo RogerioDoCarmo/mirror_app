@@ -2,6 +2,7 @@
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=coverage)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
+[![Storybook](https://img.shields.io/badge/Storybook-deployed-FF4785?logo=storybook&logoColor=white)](https://main--6a2ef191cad660cc8d53a313.chromatic.com)
 
 A React Native application that uses the front-facing camera to display a real-time mirror view.
 
