@@ -194,6 +194,32 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
+      # Cache the AVD + its boot snapshot. Cold-booting the emulator from
+      # scratch is the main source of flakes ("Timeout waiting for emulator to
+      # boot" when the emulator process crashes mid-boot) and is also the
+      # slowest part of the job. With a cached snapshot the run step warm-boots
+      # in seconds, so we only cold-boot on a cache miss (first run / key bump).
+      - name: Cache AVD snapshot
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api33-aosp-x86_64-v1
+
+      - name: Create AVD snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: default
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated -camera-front emulated'
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
       - name: Run Android emulator + Maestro E2E flows
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -204,11 +230,15 @@ jobs:
           # Miroji uses no Google APIs so this change is safe.
           target: default
           arch: x86_64
+          # Warm-boot from the cached snapshot rather than recreating the AVD;
+          # -no-snapshot-save (below) avoids re-writing it on exit.
+          force-avd-creation: false
+          disable-animations: true
           # Enable virtual front and back camera so the expo-camera TurboModule
           # can initialise successfully.  Without at least one emulated camera
           # device the native camera module silently rejects permission-check
           # calls, leaving useCameraPermissions() stuck at null forever.
-          emulator-options: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated -camera-front emulated'
+          emulator-options: '-no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated -camera-front emulated'
           script: |
             adb install *.apk
             # Stream error-level logcat to a file for post-mortem analysis;
