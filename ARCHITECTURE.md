@@ -115,9 +115,7 @@ type PermissionState =
 
 // core/domain/translations.ts — forgetting a translation is a COMPILE error
 type TranslationKey =
-  | 'permission.cameraRequired'
-  | 'permission.grantButton'
-  | 'permission.openSettings';
+  'permission.cameraRequired' | 'permission.grantButton' | 'permission.openSettings';
 type TranslationMap = Record<TranslationKey, string>;
 ```
 
