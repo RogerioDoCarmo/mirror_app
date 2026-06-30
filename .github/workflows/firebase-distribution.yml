@@ -39,7 +39,7 @@ jobs:
       bumped: ${{ steps.check.outputs.bumped }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Need history so we can read package.json at the previous commit.
           fetch-depth: 0
@@ -77,7 +77,7 @@ jobs:
       inputs.platform == 'android')
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -151,7 +151,7 @@ jobs:
       inputs.platform == 'ios')
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node
         uses: actions/setup-node@v6

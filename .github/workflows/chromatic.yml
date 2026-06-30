@@ -27,7 +27,7 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Chromatic needs full git history to find the baseline build.
           fetch-depth: 0
