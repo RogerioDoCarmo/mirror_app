@@ -60,3 +60,6 @@ build-*.aab
 storybook-static/
 *storybook.log
 chromatic.log
+
+# Local editor config (e.g. SonarLint connected mode)
+.vscode/
