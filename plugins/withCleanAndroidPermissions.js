@@ -31,7 +31,7 @@ const PERMISSIONS_TO_REMOVE = [
 
 function buildReleaseManifest() {
   const removals = PERMISSIONS_TO_REMOVE.map(
-    (name) => `    <uses-permission android:name="${name}" tools:node="remove" />`
+    (name) => `    <uses-permission android:name="${name}" tools:node="remove" />`,
   ).join('\n');
   return (
     '<manifest xmlns:android="http://schemas.android.com/apk/res/android"\n' +
