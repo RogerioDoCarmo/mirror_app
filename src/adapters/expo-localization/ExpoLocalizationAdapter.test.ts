@@ -101,7 +101,7 @@ describe('useExpoLocalization', () => {
 
     const { t } = useExpoLocalization();
 
-    expect(t('permission.grantButton')).toBe('Grant Permission');
+    expect(t('permission.grantButton')).toBe('Continue');
   });
 
   it('t() returns the Portuguese string for a valid key when locale is "pt"', () => {
@@ -109,7 +109,7 @@ describe('useExpoLocalization', () => {
 
     const { t } = useExpoLocalization();
 
-    expect(t('permission.grantButton')).toBe('Conceder Permissão');
+    expect(t('permission.grantButton')).toBe('Continuar');
   });
 
   it('t() returns the Spanish string for a valid key when locale is "es"', () => {
@@ -135,6 +135,6 @@ describe('useExpoLocalization', () => {
 
     const { t } = useExpoLocalization();
 
-    expect(t('permission.grantButton')).toBe('Grant Permission');
+    expect(t('permission.grantButton')).toBe('Continue');
   });
 });
