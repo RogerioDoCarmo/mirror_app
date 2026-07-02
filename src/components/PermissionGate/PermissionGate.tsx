@@ -5,7 +5,7 @@ import type { PermissionState } from '@/core/domain/permission';
 import { useLocale } from '@/application/providers/LocaleProvider';
 
 /** Props accepted by the {@link PermissionGate} component. */
-type Props = {
+type Props = Readonly<{
   /**
    * Current camera permission state.
    * Pass `null` while the status is still loading to show a spinner.
@@ -17,7 +17,7 @@ type Props = {
   onOpenSettings: () => void;
   /** Content rendered once permission is granted. */
   children: React.ReactNode;
-};
+}>;
 
 /**
  * Guards its children behind the camera permission lifecycle.

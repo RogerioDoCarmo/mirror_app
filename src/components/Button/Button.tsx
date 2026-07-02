@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 /** Props accepted by the {@link Button} component. */
-type Props = {
+type Props = Readonly<{
   /** Text rendered inside the button. */
   label: string;
   /** Callback invoked when the button is pressed. Not called when `disabled`. */
@@ -11,7 +11,7 @@ type Props = {
   disabled?: boolean;
   /** Test identifier forwarded to the root `Pressable`. Defaults to `"app-button"`. */
   testID?: string;
-};
+}>;
 
 /**
  * Styled pressable button used throughout the app.
