@@ -16,7 +16,7 @@ const meta = {
     ),
   ],
   args: {
-    label: 'Grant Permission',
+    label: 'Continue',
     onPress: () => {},
   },
 } satisfies Meta<typeof Button>;
