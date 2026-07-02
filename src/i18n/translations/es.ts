@@ -6,4 +6,5 @@ export const es: TranslationMap = {
   'permission.grantButton': 'Continuar',
   'permission.openSettings':
     'Por favor, habilita el acceso a la cámara en la configuración de tu dispositivo.',
+  'permission.openSettingsButton': 'Abrir Configuración',
 };

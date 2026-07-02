@@ -5,7 +5,10 @@
  * translation file, guaranteeing no string is left untranslated.
  */
 export type TranslationKey =
-  'permission.cameraRequired' | 'permission.grantButton' | 'permission.openSettings';
+  | 'permission.cameraRequired'
+  | 'permission.grantButton'
+  | 'permission.openSettings'
+  | 'permission.openSettingsButton';
 
 /**
  * A complete set of UI strings for one locale.

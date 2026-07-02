@@ -13,6 +13,8 @@ type Props = {
   permission: PermissionState;
   /** Called when the user taps the grant-permission button. */
   onRequest: () => void;
+  /** Called when the user taps the open-settings button (permission blocked). */
+  onOpenSettings: () => void;
   /** Content rendered once permission is granted. */
   children: React.ReactNode;
 };
@@ -25,10 +27,10 @@ type Props = {
  *
  * - **null** → loading spinner.
  * - **denied, canAskAgain** → rationale message + grant-permission button.
- * - **denied, blocked** → rationale message + settings guidance.
+ * - **denied, blocked** → rationale message + settings guidance + open-settings button.
  * - **granted** → renders `children`.
  */
-export function PermissionGate({ permission, onRequest, children }: Props) {
+export function PermissionGate({ permission, onRequest, onOpenSettings, children }: Props) {
   const { t } = useLocale();
 
   if (!permission) {
@@ -71,13 +73,16 @@ export function PermissionGate({ permission, onRequest, children }: Props) {
         {permission.canAskAgain ? (
           <Button label={t('permission.grantButton')} onPress={onRequest} />
         ) : (
-          <Text
-            testID="permission-settings"
-            accessibilityLabel="permission-settings"
-            style={styles.settings}
-          >
-            {t('permission.openSettings')}
-          </Text>
+          <>
+            <Text
+              testID="permission-settings"
+              accessibilityLabel="permission-settings"
+              style={styles.settings}
+            >
+              {t('permission.openSettings')}
+            </Text>
+            <Button label={t('permission.openSettingsButton')} onPress={onOpenSettings} />
+          </>
         )}
       </View>
     );
