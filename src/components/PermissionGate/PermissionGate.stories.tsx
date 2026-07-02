@@ -8,6 +8,7 @@ const meta = {
   component: PermissionGate,
   args: {
     onRequest: () => {},
+    onOpenSettings: () => {},
     children: (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ color: '#fff', fontSize: 16 }}>Camera view goes here</Text>
