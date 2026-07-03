@@ -28,6 +28,7 @@ const Child = () => <Text>{CHILD_TEXT}</Text>;
 
 describe('PermissionGate', () => {
   const mockOnRequest = jest.fn();
+  const mockOnOpenSettings = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,7 +38,11 @@ describe('PermissionGate', () => {
   describe('when permission is null (loading)', () => {
     it('shows a loading indicator', () => {
       render(
-        <PermissionGate permission={null} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={null}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -47,7 +52,11 @@ describe('PermissionGate', () => {
 
     it('does not render children', () => {
       render(
-        <PermissionGate permission={null} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={null}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -61,7 +70,11 @@ describe('PermissionGate', () => {
 
     it('shows the permission rationale message', () => {
       render(
-        <PermissionGate permission={deniedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={deniedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -71,7 +84,11 @@ describe('PermissionGate', () => {
 
     it('shows the grant permission button', () => {
       render(
-        <PermissionGate permission={deniedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={deniedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -81,7 +98,11 @@ describe('PermissionGate', () => {
 
     it('calls onRequest when the grant button is pressed', () => {
       render(
-        <PermissionGate permission={deniedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={deniedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -92,12 +113,30 @@ describe('PermissionGate', () => {
 
     it('does not render children', () => {
       render(
-        <PermissionGate permission={deniedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={deniedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
       );
       expect(screen.queryByText(CHILD_TEXT)).toBeNull();
+    });
+
+    it('does not show the open settings button', () => {
+      render(
+        <PermissionGate
+          permission={deniedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
+          <Child />
+        </PermissionGate>,
+        { wrapper },
+      );
+      expect(screen.queryByText(en['permission.openSettingsButton'])).toBeNull();
     });
   });
 
@@ -106,7 +145,11 @@ describe('PermissionGate', () => {
 
     it('shows the rationale message', () => {
       render(
-        <PermissionGate permission={blockedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={blockedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -116,7 +159,11 @@ describe('PermissionGate', () => {
 
     it('does not show the grant button', () => {
       render(
-        <PermissionGate permission={blockedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={blockedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -126,12 +173,45 @@ describe('PermissionGate', () => {
 
     it('shows a settings guidance message', () => {
       render(
-        <PermissionGate permission={blockedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={blockedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
       );
       expect(screen.getByText(en['permission.openSettings'])).toBeTruthy();
+    });
+
+    it('shows the open settings button', () => {
+      render(
+        <PermissionGate
+          permission={blockedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
+          <Child />
+        </PermissionGate>,
+        { wrapper },
+      );
+      expect(screen.getByText(en['permission.openSettingsButton'])).toBeTruthy();
+    });
+
+    it('calls onOpenSettings when the open settings button is pressed', () => {
+      render(
+        <PermissionGate
+          permission={blockedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
+          <Child />
+        </PermissionGate>,
+        { wrapper },
+      );
+      fireEvent.press(screen.getByText(en['permission.openSettingsButton']));
+      expect(mockOnOpenSettings).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -140,7 +220,11 @@ describe('PermissionGate', () => {
 
     it('renders children', () => {
       render(
-        <PermissionGate permission={grantedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={grantedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -150,7 +234,11 @@ describe('PermissionGate', () => {
 
     it('does not show the loading indicator', () => {
       render(
-        <PermissionGate permission={grantedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={grantedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
@@ -160,7 +248,11 @@ describe('PermissionGate', () => {
 
     it('does not show the rationale message', () => {
       render(
-        <PermissionGate permission={grantedPermission} onRequest={mockOnRequest}>
+        <PermissionGate
+          permission={grantedPermission}
+          onRequest={mockOnRequest}
+          onOpenSettings={mockOnOpenSettings}
+        >
           <Child />
         </PermissionGate>,
         { wrapper },
