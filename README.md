@@ -1,8 +1,38 @@
 # Miroji
 
+<!-- Build & Deployment Status -->
+
+[![CI](https://github.com/RogerioDoCarmo/mirror_app/actions/workflows/ci.yml/badge.svg)](https://github.com/RogerioDoCarmo/mirror_app/actions/workflows/ci.yml)
+[![EAS Build](https://github.com/RogerioDoCarmo/mirror_app/actions/workflows/eas-build.yml/badge.svg)](https://github.com/RogerioDoCarmo/mirror_app/actions/workflows/eas-build.yml)
+
+<!-- Code Quality -->
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=coverage)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
-[![Storybook](https://img.shields.io/badge/Storybook-deployed-FF4785?logo=storybook&logoColor=white)](https://main--6a2ef191cad660cc8d53a313.chromatic.com)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=RogerioDoCarmo_mirror_app&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=RogerioDoCarmo_mirror_app)
+
+<!-- Tech Stack -->
+
+[![Expo](https://img.shields.io/badge/Expo-SDK_54-000020?logo=expo&logoColor=white)](https://expo.dev)
+[![React Native](https://img.shields.io/badge/React_Native-0.81-61dafb?logo=react)](https://reactnative.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.x-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
+
+<!-- Project Info -->
+
+[![GitHub Release](https://img.shields.io/github/v/release/RogerioDoCarmo/mirror_app)](https://github.com/RogerioDoCarmo/mirror_app/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/RogerioDoCarmo/mirror_app?cacheSeconds=3600)](https://github.com/RogerioDoCarmo/mirror_app/stargazers)
+[![Open Issues](https://img.shields.io/github/issues/RogerioDoCarmo/mirror_app)](https://github.com/RogerioDoCarmo/mirror_app/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code Size](https://img.shields.io/github/languages/code-size/RogerioDoCarmo/mirror_app)](https://github.com/RogerioDoCarmo/mirror_app)
+[![Last Commit](https://img.shields.io/github/last-commit/RogerioDoCarmo/mirror_app)](https://github.com/RogerioDoCarmo/mirror_app/commits/main)
+
+<!-- AI Development Tools -->
+
+[![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-D97706?logo=anthropic&logoColor=white)](https://claude.ai/code)
+[![Chromatic](https://img.shields.io/badge/storybook-chromatic-FC521F?logo=storybook&logoColor=white)](https://main--6a2ef191cad660cc8d53a313.chromatic.com)
 
 A React Native application that uses the front-facing camera to display a real-time mirror view.
 
