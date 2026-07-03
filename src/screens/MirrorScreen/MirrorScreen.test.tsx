@@ -1,4 +1,5 @@
 import React from 'react';
+import { Linking } from 'react-native';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { useExpoLocalization } from '@/adapters/expo-localization/ExpoLocalizationAdapter';
 import { LocaleProvider } from '@/application/providers/LocaleProvider';
@@ -35,6 +36,7 @@ const enPort = {
 const mockCameraRef = { current: null };
 const mockOnCameraReady = jest.fn();
 const mockRequestPermission = jest.fn();
+const mockOpenSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
 
 const baseHookReturn = {
   cameraRef: mockCameraRef,
@@ -104,5 +106,28 @@ describe('MirrorScreen', () => {
     render(<MirrorScreen />, { wrapper });
 
     expect(screen.queryByTestId('camera-view')).toBeNull();
+  });
+
+  it('shows the open settings button when permission is permanently denied', () => {
+    useCamera.mockReturnValue({
+      ...baseHookReturn,
+      permission: { granted: false, canAskAgain: false },
+    });
+
+    render(<MirrorScreen />, { wrapper });
+
+    expect(screen.getByText(en['permission.openSettingsButton'])).toBeTruthy();
+  });
+
+  it('calls Linking.openSettings when the open settings button is pressed', () => {
+    useCamera.mockReturnValue({
+      ...baseHookReturn,
+      permission: { granted: false, canAskAgain: false },
+    });
+
+    render(<MirrorScreen />, { wrapper });
+    fireEvent.press(screen.getByText(en['permission.openSettingsButton']));
+
+    expect(mockOpenSettings).toHaveBeenCalledTimes(1);
   });
 });
