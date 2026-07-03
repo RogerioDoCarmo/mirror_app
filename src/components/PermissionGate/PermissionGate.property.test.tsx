@@ -23,6 +23,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(LocaleProvider, null, children);
 
 const onRequest = jest.fn();
+const onOpenSettings = jest.fn();
 
 const TestChild = () => <View testID="pg-child" />;
 
@@ -36,7 +37,7 @@ describe('PermissionGate — property tests', () => {
     fc.assert(
       fc.property(fc.boolean(), (_) => {
         const { unmount } = render(
-          <PermissionGate permission={null} onRequest={onRequest}>
+          <PermissionGate permission={null} onRequest={onRequest} onOpenSettings={onOpenSettings}>
             <TestChild />
           </PermissionGate>,
           { wrapper },
@@ -54,7 +55,11 @@ describe('PermissionGate — property tests', () => {
     fc.assert(
       fc.property(fc.boolean(), (canAskAgain) => {
         const { unmount } = render(
-          <PermissionGate permission={{ granted: true, canAskAgain }} onRequest={onRequest}>
+          <PermissionGate
+            permission={{ granted: true, canAskAgain }}
+            onRequest={onRequest}
+            onOpenSettings={onOpenSettings}
+          >
             <TestChild />
           </PermissionGate>,
           { wrapper },
@@ -72,7 +77,11 @@ describe('PermissionGate — property tests', () => {
     fc.assert(
       fc.property(fc.boolean(), (canAskAgain) => {
         const { unmount } = render(
-          <PermissionGate permission={{ granted: false, canAskAgain }} onRequest={onRequest}>
+          <PermissionGate
+            permission={{ granted: false, canAskAgain }}
+            onRequest={onRequest}
+            onOpenSettings={onOpenSettings}
+          >
             <TestChild />
           </PermissionGate>,
           { wrapper },
@@ -89,7 +98,11 @@ describe('PermissionGate — property tests', () => {
     fc.assert(
       fc.property(fc.constant(true), (canAskAgain) => {
         const { unmount } = render(
-          <PermissionGate permission={{ granted: false, canAskAgain }} onRequest={onRequest}>
+          <PermissionGate
+            permission={{ granted: false, canAskAgain }}
+            onRequest={onRequest}
+            onOpenSettings={onOpenSettings}
+          >
             <TestChild />
           </PermissionGate>,
           { wrapper },
@@ -97,6 +110,7 @@ describe('PermissionGate — property tests', () => {
 
         expect(screen.getByText(en['permission.grantButton'])).toBeTruthy();
         expect(screen.queryByText(en['permission.openSettings'])).toBeNull();
+        expect(screen.queryByText(en['permission.openSettingsButton'])).toBeNull();
 
         unmount();
       }),
@@ -107,13 +121,18 @@ describe('PermissionGate — property tests', () => {
     fc.assert(
       fc.property(fc.constant(false), (canAskAgain) => {
         const { unmount } = render(
-          <PermissionGate permission={{ granted: false, canAskAgain }} onRequest={onRequest}>
+          <PermissionGate
+            permission={{ granted: false, canAskAgain }}
+            onRequest={onRequest}
+            onOpenSettings={onOpenSettings}
+          >
             <TestChild />
           </PermissionGate>,
           { wrapper },
         );
 
         expect(screen.getByText(en['permission.openSettings'])).toBeTruthy();
+        expect(screen.getByText(en['permission.openSettingsButton'])).toBeTruthy();
         expect(screen.queryByText(en['permission.grantButton'])).toBeNull();
 
         unmount();
