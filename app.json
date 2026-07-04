@@ -8,11 +8,6 @@
     "scheme": "mirrorapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#80BBFC"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.rogeriodocarmo.miroji",
@@ -47,7 +42,32 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "./plugins/withCleanAndroidPermissions"
+      "./plugins/withCleanAndroidPermissions",
+      [
+        "expo-splash-screen",
+        {
+          "ios": {
+            "image": "./assets/splash-logo-light.png",
+            "imageWidth": 220,
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff",
+            "dark": {
+              "image": "./assets/splash-logo-dark.png",
+              "backgroundColor": "#000000"
+            }
+          },
+          "android": {
+            "image": "./assets/adaptive-icon.png",
+            "imageWidth": 180,
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff",
+            "dark": {
+              "image": "./assets/adaptive-icon.png",
+              "backgroundColor": "#000000"
+            }
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {
