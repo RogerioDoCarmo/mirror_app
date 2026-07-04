@@ -16,6 +16,18 @@ const main: StorybookConfig = {
     name: '@storybook/react-native-web-vite',
     options: {},
   },
+  async viteFinal(config) {
+    // expo-modules-core's `export type * from './ts-declarations/global'` confuses
+    // Vite's Rolldown-based dependency optimizer (it tries to bundle the
+    // type-only stub files as real runtime code). Excluding it from
+    // pre-bundling routes it through Vite's regular transform pipeline instead,
+    // which handles the type-only re-export correctly.
+    config.optimizeDeps = {
+      ...config.optimizeDeps,
+      exclude: [...(config.optimizeDeps?.exclude ?? []), 'expo-modules-core'],
+    };
+    return config;
+  },
 };
 
 export default main;
