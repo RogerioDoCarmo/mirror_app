@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 import { CameraView } from 'expo-camera';
 import { useCamera } from '@/hooks/useCamera';
 import { PermissionGate } from '@/components/PermissionGate';
@@ -19,6 +19,9 @@ export function MirrorScreen() {
       permission={permission}
       onRequest={() => {
         void requestPermission();
+      }}
+      onOpenSettings={() => {
+        void Linking.openSettings();
       }}
     >
       {/*

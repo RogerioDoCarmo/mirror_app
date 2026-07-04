@@ -7,7 +7,8 @@
 export type TranslationKey =
   | 'permission.cameraRequired'
   | 'permission.grantButton'
-  | 'permission.openSettings';
+  | 'permission.openSettings'
+  | 'permission.openSettingsButton';
 
 /**
  * A complete set of UI strings for one locale.

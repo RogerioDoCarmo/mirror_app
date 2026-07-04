@@ -39,7 +39,7 @@ appId: com.rogeriodocarmo.miroji
 
 # ── State 2: permission granted ──────────────────────────────────────────────
 # Relaunch with the permission explicitly allowed without tapping the button
-# first. Tapping 'Grant Permission' triggers the iOS/Android OS permission
+# first. Tapping the 'Continue' button triggers the iOS/Android OS permission
 # dialog; while that dialog is active, xcrun simctl privacy grant cannot
 # reliably update the permission state, causing the subsequent launchApp to
 # reopen the app with an undetermined permission and fail the assertion below.
