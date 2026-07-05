@@ -51,10 +51,12 @@ google-services.json
 GoogleService-Info.plist
 *.apk
 *.aab
+*.ipa
 *.zip
 *.tar.gz
 build-*.apk
 build-*.aab
+build-*.ipa
 
 # Storybook web build (Chromatic)
 storybook-static/
