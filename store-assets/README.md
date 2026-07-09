@@ -6,7 +6,7 @@ version control so the published store listings are reproducible and auditable.
 Each folder holds the complete 6-screenshot set for one device form factor, in
 display order:
 
-```
+```text
 01-hero · 02-mirror · 03-privacy · 04-languages · 05-permission · 06-open-settings
 ```
 

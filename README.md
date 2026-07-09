@@ -150,7 +150,7 @@ type-driven domain modeling on an auditable codebase.
 **→ See [ARCHITECTURE.md](ARCHITECTURE.md)** for the dependency diagram, the SOLID/pattern
 mapping anchored to real files, and an honest account of the trade-offs.
 
-```
+```text
 src/
 ├── core/                     # ← inward-most: no library imports
 │   ├── domain/               #   pure types (PermissionState, TranslationKey, SupportedLocale)
@@ -197,7 +197,7 @@ src/
 
 Every pull request into `develop` or `main` triggers the CI workflow:
 
-```
+```text
 Lint → Typecheck → Unit/Integration Tests → Mutation Tests
 ```
 
