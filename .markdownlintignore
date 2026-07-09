@@ -1,0 +1,6 @@
+node_modules/
+.expo/
+.stryker-tmp/
+ios/Pods/
+coverage/
+reports/
