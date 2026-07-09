@@ -7,9 +7,10 @@
   "MD013": false,
 
   // README.md relies on raw HTML for the centered logo/badge banner and the
-  // side-by-side screenshot grid, which plain Markdown can't express.
+  // side-by-side screenshot grid, which plain Markdown can't express. `a` is
+  // needed to size-control the official Apple App Store badge image.
   "MD033": {
-    "allowed_elements": ["p", "img", "h1", "br"]
+    "allowed_elements": ["p", "img", "h1", "br", "a"]
   },
 
   // Some docs (e.g. README.md's centered banner, CLAUDE.md's `@AGENTS.md`

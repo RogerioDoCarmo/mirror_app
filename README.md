@@ -26,7 +26,9 @@
 
 <!-- Store Availability -->
 
-[![Download on the App Store](https://img.shields.io/badge/App_Store-Download-000000?logo=apple&logoColor=white)](https://apps.apple.com/app/id6774924907)
+<p align="center">
+  <a href="https://apps.apple.com/app/id6774924907"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" height="40" /></a>
+</p>
 
 <!-- Project Info -->
 
