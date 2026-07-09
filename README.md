@@ -24,6 +24,10 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-10.x-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 
+<!-- Store Availability -->
+
+[![Download on the App Store](https://img.shields.io/badge/App_Store-Download-000000?logo=apple&logoColor=white)](https://apps.apple.com/app/id6774924907)
+
 <!-- Project Info -->
 
 [![GitHub Release](https://img.shields.io/github/v/release/RogerioDoCarmo/mirror_app)](https://github.com/RogerioDoCarmo/mirror_app/releases)
