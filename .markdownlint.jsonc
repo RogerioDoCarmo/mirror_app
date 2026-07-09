@@ -1,0 +1,18 @@
+{
+  // https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+  "default": true,
+
+  // Docs here mix long prose, tables, and link-heavy lines; hard-wrapping at
+  // 80 chars hurts readability more than it helps.
+  "MD013": false,
+
+  // README.md relies on raw HTML for the centered logo/badge banner and the
+  // side-by-side screenshot grid, which plain Markdown can't express.
+  "MD033": {
+    "allowed_elements": ["p", "img", "h1", "br"]
+  },
+
+  // Some docs (e.g. README.md's centered banner, CLAUDE.md's `@AGENTS.md`
+  // include) intentionally don't open with a Markdown "#" heading.
+  "MD041": false
+}

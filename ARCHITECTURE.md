@@ -16,7 +16,7 @@ principle below has a concrete, auditable home in the code.
 Source dependencies only ever point **inward**, toward the domain. The domain knows
 nothing about React, Expo, or any library; the libraries are pushed to the very edge.
 
-```
+```text
         ┌──────────────────────────────────────────────┐
         │                    UI layer                    │
         │        screens/ · components/ · hooks/         │
