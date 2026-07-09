@@ -1,11 +1,11 @@
 # Privacy Policy
 
-**Miroji · Last updated: 14 June 2026**
+Miroji · Last updated: 14 June 2026
 
 > **Short version:** Miroji is a simple mirror. It shows your device's front-camera feed on screen in real time. It does **not** collect, store, record, or transmit any personal data, photos, or video. Everything happens on your device.
 
 The hosted version of this policy (the URL used in the Google Play and App Store listings) is published at:
-**https://rogeriodocarmo.github.io/mirror_app/privacy-policy.html**
+**<https://rogeriodocarmo.github.io/mirror_app/privacy-policy.html>**
 
 ## 1. Who we are
 
