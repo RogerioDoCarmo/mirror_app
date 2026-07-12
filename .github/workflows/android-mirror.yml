@@ -1,0 +1,95 @@
+name: Mirror Android Build
+
+# Publishes a self-contained, buildable Gradle snapshot of the Android
+# project to RogerioDoCarmo/mirror_app-android on every release, so
+# downstream build systems (e.g. F-Droid) can build with plain
+# `./gradlew assembleRelease` — no pnpm/npm registry access required.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source at release tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          path: source
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Install dependencies
+        working-directory: source
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate native Android project
+        working-directory: source
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Assemble build-only snapshot
+        run: |
+          mkdir -p mirror
+          items=(
+            android
+            node_modules
+            src
+            App.tsx
+            index.ts
+            assets
+            app.json
+            package.json
+            pnpm-lock.yaml
+            tsconfig.json
+            metro.config.js
+            plugins
+            LICENSE
+            PRIVACY.md
+            .gitignore
+          )
+          for item in "${items[@]}"; do
+            if [ -e "source/$item" ]; then
+              cp -R "source/$item" "mirror/$item"
+            fi
+          done
+
+      - name: Checkout destination repository
+        uses: actions/checkout@v7
+        with:
+          repository: RogerioDoCarmo/mirror_app-android
+          token: ${{ secrets.MIRROR_APP_ANDROID_TOKEN }}
+          path: dest
+
+      - name: Sync snapshot into destination
+        run: |
+          rsync -a --delete --exclude='.git' --exclude='README.md' mirror/ dest/
+
+      - name: Commit and push
+        working-directory: dest
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to mirror for $TAG"
+            exit 0
+          fi
+          git commit -m "Mirror $TAG from mirror_app"
+          git tag -f "$TAG"
+          git push origin main
+          git push origin "$TAG" --force
