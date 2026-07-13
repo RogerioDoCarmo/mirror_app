@@ -8,6 +8,12 @@ name: Mirror Android Build
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to mirror (e.g. v1.3.1)'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -15,11 +21,13 @@ permissions:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.event.release.tag_name }}
     steps:
       - name: Checkout source at release tag
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ env.TAG }}
           path: source
 
       - name: Setup Node
@@ -79,8 +87,6 @@ jobs:
 
       - name: Commit and push
         working-directory: dest
-        env:
-          TAG: ${{ github.event.release.tag_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
