@@ -66,7 +66,6 @@ jobs:
             plugins
             LICENSE
             PRIVACY.md
-            .gitignore
           )
           for item in "${items[@]}"; do
             if [ -e "source/$item" ]; then
@@ -83,7 +82,7 @@ jobs:
 
       - name: Sync snapshot into destination
         run: |
-          rsync -a --delete --exclude='.git' --exclude='README.md' mirror/ dest/
+          rsync -a --delete --exclude='.git' --exclude='README.md' --exclude='.gitignore' mirror/ dest/
 
       - name: Commit and push
         working-directory: dest
