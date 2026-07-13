@@ -48,6 +48,23 @@ jobs:
         working-directory: source
         run: npx expo prebuild --platform android --no-install
 
+      - name: Set deterministic versionCode from tag
+        working-directory: source
+        run: |
+          # appVersionSource=remote means prebuild has no EAS connection here,
+          # so build.gradle always gets a hardcoded placeholder versionCode.
+          # Derive a real one straight from the semver tag instead — F-Droid
+          # only needs it to match the built APK and increase monotonically,
+          # not to match Play Store's own numbering.
+          VERSION="${TAG#v}"
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
+          CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+          echo "Setting versionCode=$CODE for $TAG"
+          sed -i "s/versionCode [0-9][0-9]*/versionCode $CODE/" android/app/build.gradle
+          grep -n "versionCode\|versionName" android/app/build.gradle
+
       - name: Assemble build-only snapshot
         run: |
           mkdir -p mirror
