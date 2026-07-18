@@ -30,6 +30,16 @@ jobs:
           ref: ${{ env.TAG }}
           path: source
 
+      # F-Droid build patches are packaging tooling, not release source —
+      # they evolve after tags are cut, so they always come from main
+      # (same as this workflow itself), not from the mirrored tag.
+      - name: Checkout packaging patches from main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          path: tooling
+          sparse-checkout: patches
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
@@ -83,7 +93,6 @@ jobs:
             tsconfig.json
             metro.config.js
             plugins
-            patches
             LICENSE
             PRIVACY.md
           )
@@ -92,6 +101,9 @@ jobs:
               cp -R "source/$item" "mirror/$item"
             fi
           done
+          if [ -e tooling/patches ]; then
+            cp -R tooling/patches mirror/patches
+          fi
 
       - name: Make snapshot F-Droid source-buildable
         run: |
