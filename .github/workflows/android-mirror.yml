@@ -90,6 +90,33 @@ jobs:
             fi
           done
 
+      - name: Make snapshot F-Droid source-buildable
+        run: |
+          # F-Droid policy requires everything in the APK to be compiled from
+          # source on their servers. Expo ships its native modules as prebuilt
+          # AARs (local-maven-repo/) by default — force Gradle to compile every
+          # Expo/RN module from source instead, via Expo's official autolinking
+          # option (same approach as dev.djara.wafrn_rn in fdroiddata).
+          node -e "
+            const fs = require('fs');
+            const f = 'mirror/package.json';
+            const j = JSON.parse(fs.readFileSync(f, 'utf8'));
+            j.expo = j.expo || {};
+            j.expo.autolinking = j.expo.autolinking || {};
+            j.expo.autolinking.android = j.expo.autolinking.android || {};
+            j.expo.autolinking.android.buildFromSource = ['.*'];
+            fs.writeFileSync(f, JSON.stringify(j, null, 2) + '\n');
+          "
+          # With buildFromSource active the prebuilt AARs are never consumed —
+          # strip them (and non-Linux Hermes compiler binaries) so the mirror
+          # contains no unused binary blobs for F-Droid's scanner to flag.
+          # Only hermesc/linux64-bin remains, which the build genuinely needs.
+          find mirror/node_modules -type d -name local-maven-repo -prune -exec rm -rf {} +
+          rm -rf mirror/node_modules/react-native/sdks/hermesc/win64-bin
+          rm -rf mirror/node_modules/react-native/sdks/hermesc/osx-bin
+          echo "Remaining local-maven-repo dirs (expect 0):"
+          find mirror/node_modules -type d -name local-maven-repo | wc -l
+
       - name: Checkout destination repository
         uses: actions/checkout@v7
         with:
@@ -99,7 +126,7 @@ jobs:
 
       - name: Sync snapshot into destination
         run: |
-          rsync -a --delete --exclude='.git' --exclude='README.md' --exclude='.gitignore' mirror/ dest/
+          rsync -a --delete --exclude='.git' --exclude='README.md' --exclude='.gitignore' --exclude='fastlane' mirror/ dest/
 
       - name: Commit and push
         working-directory: dest
