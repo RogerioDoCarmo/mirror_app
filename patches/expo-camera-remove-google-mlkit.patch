@@ -1,0 +1,519 @@
+diff -ruN a/build.gradle b/build.gradle
+--- a/build.gradle	2026-07-18 16:37:57
++++ b/build.gradle	2026-07-18 16:37:57
+@@ -24,10 +24,7 @@
+   implementation "androidx.camera:camera-camera2:${camerax_version}"
+   implementation "androidx.camera:camera-lifecycle:${camerax_version}"
+   implementation "androidx.camera:camera-video:${camerax_version}"
+-  implementation "com.google.android.gms:play-services-code-scanner:16.1.0"
+ 
+   implementation "androidx.camera:camera-view:${camerax_version}"
+   implementation "androidx.camera:camera-extensions:${camerax_version}"
+-  implementation "com.google.mlkit:barcode-scanning:17.3.0"
+-  implementation "androidx.camera:camera-mlkit-vision:${camerax_version}"
+ }
+diff -ruN a/src/main/AndroidManifest.xml b/src/main/AndroidManifest.xml
+--- a/src/main/AndroidManifest.xml	2026-07-18 16:37:57
++++ b/src/main/AndroidManifest.xml	2026-07-18 16:37:57
+@@ -3,8 +3,5 @@
+   <uses-permission android:name="android.permission.RECORD_AUDIO" />
+ 
+   <application>
+-    <meta-data
+-      android:name="com.google.mlkit.vision.DEPENDENCIES"
+-      android:value="barcode_ui"/>
+   </application>
+ </manifest>
+diff -ruN a/src/main/java/expo/modules/camera/CameraViewModule.kt b/src/main/java/expo/modules/camera/CameraViewModule.kt
+--- a/src/main/java/expo/modules/camera/CameraViewModule.kt	2026-07-18 16:37:57
++++ b/src/main/java/expo/modules/camera/CameraViewModule.kt	2026-07-18 16:40:55
+@@ -6,10 +6,6 @@
+ import android.os.Bundle
+ import android.util.Base64
+ import android.util.Log
+-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+-import expo.modules.camera.analyzers.BarCodeScannerResultSerializer
+-import expo.modules.camera.analyzers.MLKitBarCodeScanner
+ import expo.modules.camera.records.BarcodeSettings
+ import expo.modules.camera.records.BarcodeType
+ import expo.modules.camera.records.CameraMode
+@@ -110,82 +106,13 @@
+     }
+ 
+     AsyncFunction("scanFromURLAsync") { url: String, barcodeTypes: List<BarcodeType>, promise: Promise ->
+-      if (!CameraUtils.isMLKitAvailable(appContext.reactContext)) {
+-        promise.reject(CameraExceptions.MLKitUnavailableException())
+-        return@AsyncFunction
+-      }
+-
+-      appContext.imageLoader?.loadImageForManipulationFromURL(
+-        url,
+-        object : ImageLoaderInterface.ResultListener {
+-          override fun onSuccess(bitmap: Bitmap) {
+-            try {
+-              val scanner = MLKitBarCodeScanner()
+-              val formats = barcodeTypes.map { it.mapToBarcode() }
+-              scanner.setSettings(formats)
+-
+-              moduleScope.launch {
+-                try {
+-                  val barcodes = scanner.scan(bitmap)
+-                    .filter { formats.contains(it.type) }
+-                    .map { BarCodeScannerResultSerializer.toBundle(it, 1.0f) }
+-                  promise.resolve(barcodes)
+-                } catch (e: Exception) {
+-                  Log.e(TAG, "ML Kit scanning failed: ${e.message}")
+-                  promise.reject(CameraExceptions.MLKitUnavailableException())
+-                }
+-              }
+-            } catch (e: Exception) {
+-              promise.reject(CameraExceptions.MLKitUnavailableException())
+-            }
+-          }
+-
+-          override fun onFailure(cause: Throwable?) {
+-            promise.reject(CameraExceptions.ImageRetrievalException(url))
+-          }
+-        }
+-      )
++      // FOSS build: barcode scanning (Google MLKit) is not available.
++      promise.reject(CameraExceptions.MLKitUnavailableException())
+     }
+ 
+     AsyncFunction("launchScanner") { settings: BarcodeSettings, promise: Promise ->
+-      if (!CameraUtils.hasGooglePlayServices(appContext.reactContext)) {
+-        promise.reject(CameraExceptions.GooglePlayServicesUnavailableException())
+-        return@AsyncFunction
+-      }
+-
+-      val reactContext = appContext.reactContext
+-
+-      if (reactContext == null) {
+-        promise.reject(Exceptions.ReactContextLost())
+-        return@AsyncFunction
+-      }
+-
+-      try {
+-        val options = GmsBarcodeScannerOptions.Builder().apply {
+-          if (settings.barcodeTypes.isNotEmpty()) {
+-            setBarcodeFormats(
+-              settings.barcodeTypes.first().mapToBarcode(),
+-              *settings.barcodeTypes.drop(1).map { it.mapToBarcode() }.toIntArray()
+-            )
+-          }
+-        }.build()
+-
+-        val scanner = GmsBarcodeScanning.getClient(reactContext, options)
+-        scanner.startScan()
+-          .addOnSuccessListener { barcode ->
+-            val result = BarCodeScannerResultSerializer.parseBarcodeScanningResult(barcode)
+-            sendEvent("onModernBarcodeScanned", BarCodeScannerResultSerializer.toBundle(result, 1.0f))
+-            promise.resolve()
+-          }
+-          .addOnCanceledListener {
+-            promise.reject(CameraExceptions.BarcodeScanningCancelledException())
+-          }
+-          .addOnFailureListener {
+-            promise.reject(CameraExceptions.BarcodeScanningFailedException())
+-          }
+-      } catch (_: Exception) {
+-        promise.reject(CameraExceptions.GooglePlayServicesUnavailableException())
+-      }
++      // FOSS build: barcode scanning (Google Play Services) is not available.
++      promise.reject(CameraExceptions.GooglePlayServicesUnavailableException())
+     }
+ 
+     AsyncFunction("dismissScanner") {
+diff -ruN a/src/main/java/expo/modules/camera/analyzers/BarcodeAnalyzer.kt b/src/main/java/expo/modules/camera/analyzers/BarcodeAnalyzer.kt
+--- a/src/main/java/expo/modules/camera/analyzers/BarcodeAnalyzer.kt	2026-07-18 16:37:57
++++ b/src/main/java/expo/modules/camera/analyzers/BarcodeAnalyzer.kt	2026-07-18 16:39:33
+@@ -1,78 +1,18 @@
+ package expo.modules.camera.analyzers
+ 
+-import android.util.Log
+-import androidx.annotation.OptIn
+-import androidx.camera.core.ExperimentalGetImage
+ import androidx.camera.core.ImageAnalysis
+ import androidx.camera.core.ImageProxy
+-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+-import com.google.mlkit.vision.barcode.BarcodeScanning
+-import com.google.mlkit.vision.common.InputImage
+-import expo.modules.camera.CameraViewHelper
+ import expo.modules.camera.records.BarcodeType
+ import expo.modules.camera.records.CameraType
+ import expo.modules.camera.utils.BarCodeScannerResult
+ 
+-@OptIn(ExperimentalGetImage::class)
++// FOSS build: barcode scanning (Google MLKit) removed. This stub keeps the
++// class signature so the rest of the module compiles unchanged; it is never
++// attached at runtime because CameraUtils.isMLKitBarcodeScannerAvailable()
++// returns false when MLKit classes are absent.
+ class BarcodeAnalyzer(private val lensFacing: CameraType, formats: List<BarcodeType>, val onComplete: (BarCodeScannerResult) -> Unit) : ImageAnalysis.Analyzer {
+-  private val barcodeFormats = if (formats.isEmpty()) {
+-    0
+-  } else {
+-    formats.map { it.mapToBarcode() }.reduce { acc, it ->
+-      acc or it
+-    }
+-  }
+-  private var barcodeScannerOptions =
+-    BarcodeScannerOptions.Builder()
+-      .setBarcodeFormats(barcodeFormats)
+-      .build()
+-  private var barcodeScanner = BarcodeScanning.getClient(barcodeScannerOptions)
+-
+   override fun analyze(imageProxy: ImageProxy) {
+-    val mediaImage = imageProxy.image
+-
+-    if (mediaImage != null) {
+-      val rotation = CameraViewHelper.getCorrectCameraRotation(imageProxy.imageInfo.rotationDegrees, lensFacing)
+-      val image = InputImage.fromMediaImage(mediaImage, rotation)
+-
+-      barcodeScanner.process(image)
+-        .addOnSuccessListener { barcodes ->
+-          if (barcodes.isEmpty()) {
+-            return@addOnSuccessListener
+-          }
+-          val barcode = barcodes.first()
+-          val raw = barcode.rawValue ?: barcode.rawBytes?.let { String(it) }
+-
+-          val cornerPoints = barcode.cornerPoints?.let { points ->
+-            // Pre-allocate array
+-            IntArray(points.size * 2).apply {
+-              points.forEachIndexed { index, point ->
+-                this[index * 2] = point.x
+-                this[index * 2 + 1] = point.y
+-              }
+-            }.toMutableList()
+-          } ?: mutableListOf()
+-
+-          val extra = BarCodeScannerResultSerializer.parseExtraDate(barcode)
+-          onComplete(
+-            BarCodeScannerResult(
+-              barcode.format,
+-              barcode.displayValue,
+-              raw,
+-              extra,
+-              cornerPoints,
+-              imageProxy.width,
+-              imageProxy.height
+-            )
+-          )
+-        }
+-        .addOnFailureListener {
+-          Log.d("SCANNER", it.cause?.message ?: "Barcode scanning failed")
+-        }
+-        .addOnCompleteListener {
+-          imageProxy.close()
+-        }
+-    }
++    imageProxy.close()
+   }
+ }
+ 
+diff -ruN a/src/main/java/expo/modules/camera/analyzers/BarcodeScannerResultSerializer.kt b/src/main/java/expo/modules/camera/analyzers/BarcodeScannerResultSerializer.kt
+--- a/src/main/java/expo/modules/camera/analyzers/BarcodeScannerResultSerializer.kt	2026-07-18 16:37:57
++++ b/src/main/java/expo/modules/camera/analyzers/BarcodeScannerResultSerializer.kt	1969-12-31 21:00:00
+@@ -1,174 +0,0 @@
+-package expo.modules.camera.analyzers
+-
+-import android.os.Bundle
+-import android.util.Pair
+-import com.google.mlkit.vision.barcode.common.Barcode
+-import com.google.mlkit.vision.common.InputImage
+-import expo.modules.camera.utils.BarCodeScannerResult
+-
+-object BarCodeScannerResultSerializer {
+-  fun toBundle(result: BarCodeScannerResult, density: Float) =
+-    Bundle().apply {
+-      putString("data", result.value)
+-      putString("raw", result.raw)
+-      putInt("type", result.type)
+-      putBundle("extra", result.extra)
+-      val cornerPointsAndBoundingBox = getCornerPointsAndBoundingBox(result.cornerPoints, result.boundingBox, density)
+-      putParcelableArrayList("cornerPoints", cornerPointsAndBoundingBox.first)
+-      putBundle("bounds", cornerPointsAndBoundingBox.second)
+-    }
+-
+-  fun parseBarcodeScanningResult(barcode: Barcode, inputImage: InputImage? = null): BarCodeScannerResult {
+-    val raw = barcode.rawValue ?: barcode.rawBytes?.let { String(it) }
+-    val value = if (barcode.valueType == Barcode.TYPE_CONTACT_INFO) {
+-      raw
+-    } else {
+-      barcode.displayValue
+-    }
+-    val cornerPoints = mutableListOf<Int>()
+-    barcode.cornerPoints?.let { points ->
+-      for (point in points) {
+-        cornerPoints.addAll(listOf(point.x, point.y))
+-      }
+-    }
+-
+-    val extra = parseExtraDate(barcode)
+-    return BarCodeScannerResult(barcode.format, value, raw, extra, cornerPoints, inputImage?.height ?: 0, inputImage?.width ?: 0)
+-  }
+-
+-  private fun getCornerPointsAndBoundingBox(
+-    cornerPoints: List<Int>,
+-    boundingBox: BarCodeScannerResult.BoundingBox,
+-    density: Float
+-  ): Pair<ArrayList<Bundle>, Bundle> {
+-    val convertedCornerPoints = ArrayList<Bundle>()
+-    for (i in cornerPoints.indices step 2) {
+-      val x = cornerPoints[i].toFloat() / density
+-      val y = cornerPoints[i + 1].toFloat() / density
+-
+-      convertedCornerPoints.add(getPoint(x, y))
+-    }
+-    val boundingBoxBundle = Bundle().apply {
+-      putParcelable("origin", getPoint(boundingBox.x.toFloat() / density, boundingBox.y.toFloat() / density))
+-      putParcelable("size", getSize(boundingBox.width.toFloat() / density, boundingBox.height.toFloat() / density))
+-    }
+-    return Pair(convertedCornerPoints, boundingBoxBundle)
+-  }
+-
+-  fun parseExtraDate(barcode: Barcode): Bundle {
+-    val result = Bundle()
+-
+-    when (barcode.valueType) {
+-      Barcode.TYPE_CONTACT_INFO -> {
+-        val info = barcode.contactInfo
+-        result.apply {
+-          putString("type", "contactInfo")
+-          putString("firstName", info?.name?.first)
+-          putString("middleName", info?.name?.middle)
+-          putString("lastName", info?.name?.last)
+-          putString("title", info?.title)
+-          putString("organization", info?.organization)
+-          putString("email", info?.emails?.firstOrNull()?.address)
+-          putString("phone", info?.phones?.firstOrNull()?.number)
+-          putString("url", info?.urls?.firstOrNull())
+-          putString("address", info?.addresses?.firstOrNull()?.addressLines?.firstOrNull())
+-        }
+-      }
+-
+-      Barcode.TYPE_GEO -> {
+-        val geo = barcode.geoPoint
+-        result.apply {
+-          putString("type", "geoPoint")
+-          putString("lat", geo?.lat.toString())
+-          putString("lng", geo?.lng.toString())
+-        }
+-      }
+-
+-      Barcode.TYPE_SMS -> {
+-        val sms = barcode.sms
+-        result.apply {
+-          putString("type", "sms")
+-          putString("phoneNumber", sms?.phoneNumber)
+-          putString("message", sms?.message)
+-        }
+-      }
+-
+-      Barcode.TYPE_URL -> {
+-        val url = barcode.url
+-        result.putString("type", "url")
+-        result.putString("url", url?.url)
+-      }
+-
+-      Barcode.TYPE_CALENDAR_EVENT -> {
+-        val event = barcode.calendarEvent
+-        result.apply {
+-          result.putString("type", "calendarEvent")
+-          putString("summary", event?.summary)
+-          putString("description", event?.description)
+-          putString("location", event?.location)
+-          putString("start", event?.start?.toString())
+-          putString("end", event?.end?.toString())
+-        }
+-      }
+-
+-      Barcode.TYPE_DRIVER_LICENSE -> {
+-        val license = barcode.driverLicense
+-        result.apply {
+-          result.putString("type", "driverLicense")
+-          putString("firstName", license?.firstName)
+-          putString("middleName", license?.middleName)
+-          putString("lastName", license?.lastName)
+-          putString("licenseNumber", license?.licenseNumber)
+-          putString("expiryDate", license?.expiryDate)
+-          putString("issueDate", license?.issueDate)
+-          putString("addressStreet", license?.addressStreet)
+-          putString("addressCity", license?.addressCity)
+-          putString("addressState", license?.addressState)
+-        }
+-      }
+-
+-      Barcode.TYPE_EMAIL -> {
+-        val email = barcode.email
+-        result.apply {
+-          result.putString("type", "email")
+-          putString("address", email?.address)
+-          putString("subject", email?.subject)
+-          putString("body", email?.body)
+-        }
+-      }
+-
+-      Barcode.TYPE_PHONE -> {
+-        val phone = barcode.phone
+-        result.apply {
+-          result.putString("type", "phone")
+-          putString("number", phone?.number)
+-          putString("phoneNumberType", phone?.type.toString())
+-        }
+-      }
+-
+-      Barcode.TYPE_WIFI -> {
+-        val wifi = barcode.wifi
+-        result.apply {
+-          result.putString("type", "wifi")
+-          putString("ssid", wifi?.ssid)
+-          putString("password", wifi?.password)
+-          putString("type", wifi?.encryptionType.toString())
+-        }
+-      }
+-    }
+-
+-    return result
+-  }
+-
+-  private fun getSize(width: Float, height: Float) =
+-    Bundle().apply {
+-      putFloat("width", width)
+-      putFloat("height", height)
+-    }
+-
+-  private fun getPoint(x: Float, y: Float) =
+-    Bundle().apply {
+-      putFloat("x", x)
+-      putFloat("y", y)
+-    }
+-}
+diff -ruN a/src/main/java/expo/modules/camera/analyzers/MLKitBarcodeAnalyzer.kt b/src/main/java/expo/modules/camera/analyzers/MLKitBarcodeAnalyzer.kt
+--- a/src/main/java/expo/modules/camera/analyzers/MLKitBarcodeAnalyzer.kt	2026-07-18 16:37:57
++++ b/src/main/java/expo/modules/camera/analyzers/MLKitBarcodeAnalyzer.kt	1969-12-31 21:00:00
+@@ -1,89 +0,0 @@
+-package expo.modules.camera.analyzers
+-
+-import android.graphics.Bitmap
+-import android.util.Log
+-import com.google.android.gms.tasks.Task
+-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+-import com.google.mlkit.vision.barcode.BarcodeScanning
+-import com.google.mlkit.vision.barcode.common.Barcode
+-import com.google.mlkit.vision.common.InputImage
+-import expo.modules.camera.utils.BarCodeScannerResult
+-import kotlinx.coroutines.Dispatchers
+-import kotlinx.coroutines.suspendCancellableCoroutine
+-import kotlinx.coroutines.withContext
+-import kotlin.coroutines.resume
+-import kotlin.coroutines.resumeWithException
+-
+-class MLKitBarCodeScanner {
+-  private var barCodeTypes: List<Int>? = null
+-  private var barcodeScannerOptions =
+-    BarcodeScannerOptions.Builder()
+-      .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+-      .build()
+-  private var barcodeScanner = BarcodeScanning.getClient(barcodeScannerOptions)
+-
+-  suspend fun scan(bitmap: Bitmap): List<BarCodeScannerResult> = withContext(Dispatchers.IO) {
+-    val inputImage = InputImage.fromBitmap(bitmap, 0)
+-    try {
+-      val result: List<Barcode> = barcodeScanner.process(inputImage).await()
+-      val results = mutableListOf<BarCodeScannerResult>()
+-      if (result.isEmpty()) {
+-        return@withContext results
+-      }
+-      for (barcode in result) {
+-        results.add(BarCodeScannerResultSerializer.parseBarcodeScanningResult(barcode, inputImage))
+-      }
+-      return@withContext results
+-    } catch (e: Exception) {
+-      Log.e(TAG, "Failed to detect barcode: " + e.message)
+-      return@withContext emptyList()
+-    }
+-  }
+-
+-  fun setSettings(formats: List<Int>) {
+-    if (areNewAndOldBarCodeTypesEqual(formats)) {
+-      return
+-    }
+-    val barcodeFormats = formats.reduce { acc, it ->
+-      acc or it
+-    }
+-
+-    barCodeTypes = formats
+-    barcodeScannerOptions = BarcodeScannerOptions.Builder()
+-      .setBarcodeFormats(barcodeFormats)
+-      .build()
+-    barcodeScanner = BarcodeScanning.getClient(barcodeScannerOptions)
+-  }
+-
+-  private fun areNewAndOldBarCodeTypesEqual(newBarCodeTypes: List<Int>): Boolean {
+-    barCodeTypes?.run {
+-      // create distinct-values sets
+-      val prevTypesSet = toHashSet()
+-      val nextTypesSet = newBarCodeTypes.toHashSet()
+-
+-      // sets sizes are equal -> possible content equality
+-      if (prevTypesSet.size == nextTypesSet.size) {
+-        prevTypesSet.removeAll(nextTypesSet)
+-        // every element from new set was in previous one -> sets are equal
+-        return prevTypesSet.isEmpty()
+-      }
+-    }
+-    return false
+-  }
+-
+-  companion object {
+-    private val TAG = MLKitBarCodeScanner::class.java.simpleName
+-  }
+-}
+-
+-suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { continuation ->
+-  addOnSuccessListener { result ->
+-    continuation.resume(result)
+-  }
+-  addOnFailureListener { exception ->
+-    continuation.resumeWithException(exception)
+-  }
+-  addOnCanceledListener {
+-    continuation.cancel()
+-  }
+-}
+diff -ruN a/src/main/java/expo/modules/camera/records/CameraRecords.kt b/src/main/java/expo/modules/camera/records/CameraRecords.kt
+--- a/src/main/java/expo/modules/camera/records/CameraRecords.kt	2026-07-18 16:37:57
++++ b/src/main/java/expo/modules/camera/records/CameraRecords.kt	2026-07-18 16:40:04
+@@ -4,10 +4,29 @@
+ import androidx.camera.core.ImageCapture
+ import androidx.camera.core.resolutionselector.AspectRatioStrategy
+ import androidx.camera.video.Quality
+-import com.google.mlkit.vision.barcode.common.Barcode
+ import expo.modules.kotlin.records.Field
+ import expo.modules.kotlin.records.Record
+ import expo.modules.kotlin.types.Enumerable
++
++// FOSS build: Google MLKit removed. These are the stable public constant
++// values of com.google.mlkit.vision.barcode.common.Barcode.FORMAT_*, kept so
++// the module's public API (barcode type mapping) compiles without MLKit.
++private object Barcode {
++  const val FORMAT_UNKNOWN = -1
++  const val FORMAT_CODE_128 = 1
++  const val FORMAT_CODE_39 = 2
++  const val FORMAT_CODE_93 = 4
++  const val FORMAT_CODABAR = 8
++  const val FORMAT_DATA_MATRIX = 16
++  const val FORMAT_EAN_13 = 32
++  const val FORMAT_EAN_8 = 64
++  const val FORMAT_ITF = 128
++  const val FORMAT_QR_CODE = 256
++  const val FORMAT_UPC_A = 512
++  const val FORMAT_UPC_E = 1024
++  const val FORMAT_PDF417 = 2048
++  const val FORMAT_AZTEC = 4096
++}
+ 
+ enum class CameraType(val value: String) : Enumerable {
+   FRONT("front"),
