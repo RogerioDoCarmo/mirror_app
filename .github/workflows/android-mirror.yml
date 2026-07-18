@@ -83,6 +83,7 @@ jobs:
             tsconfig.json
             metro.config.js
             plugins
+            patches
             LICENSE
             PRIVACY.md
           )
