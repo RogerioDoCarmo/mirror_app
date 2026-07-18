@@ -3,6 +3,17 @@ name: EAS Build & Submit
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'App.tsx'
+      - 'index.ts'
+      - 'assets/**'
+      - 'app.json'
+      - 'eas.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'plugins/**'
+      - 'metro.config.js'
   workflow_dispatch:
     inputs:
       platform:
