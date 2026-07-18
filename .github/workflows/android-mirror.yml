@@ -67,10 +67,12 @@ jobs:
 
       - name: Assemble build-only snapshot
         run: |
+          # node_modules is intentionally NOT mirrored: F-Droid's recipe
+          # installs dependencies at build time with `pnpm install
+          # --frozen-lockfile`, pinned by the mirrored pnpm-lock.yaml.
           mkdir -p mirror
           items=(
             android
-            node_modules
             src
             App.tsx
             index.ts
@@ -96,7 +98,8 @@ jobs:
           # source on their servers. Expo ships its native modules as prebuilt
           # AARs (local-maven-repo/) by default — force Gradle to compile every
           # Expo/RN module from source instead, via Expo's official autolinking
-          # option (same approach as dev.djara.wafrn_rn in fdroiddata).
+          # option. The unused AARs are then removed by the F-Droid scanner's
+          # scandelete without affecting the build.
           node -e "
             const fs = require('fs');
             const f = 'mirror/package.json';
@@ -107,15 +110,12 @@ jobs:
             j.expo.autolinking.android.buildFromSource = ['.*'];
             fs.writeFileSync(f, JSON.stringify(j, null, 2) + '\n');
           "
-          # With buildFromSource active the prebuilt AARs are never consumed —
-          # strip them (and non-Linux Hermes compiler binaries) so the mirror
-          # contains no unused binary blobs for F-Droid's scanner to flag.
-          # Only hermesc/linux64-bin remains, which the build genuinely needs.
-          find mirror/node_modules -type d -name local-maven-repo -prune -exec rm -rf {} +
-          rm -rf mirror/node_modules/react-native/sdks/hermesc/win64-bin
-          rm -rf mirror/node_modules/react-native/sdks/hermesc/osx-bin
-          echo "Remaining local-maven-repo dirs (expect 0):"
-          find mirror/node_modules -type d -name local-maven-repo | wc -l
+          # F-Droid's scanner resolves real paths, but pnpm's default layout
+          # symlinks everything through node_modules/.pnpm/<name@ver_peerhash>/,
+          # whose dir names change with the lockfile — impossible to reference
+          # stably from the recipe's scanignore. node-linker=hoisted makes pnpm
+          # produce a flat, symlink-free node_modules so plain paths are real.
+          echo "node-linker=hoisted" > mirror/.npmrc
 
       - name: Checkout destination repository
         uses: actions/checkout@v7

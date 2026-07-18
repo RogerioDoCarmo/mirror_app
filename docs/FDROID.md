@@ -26,25 +26,29 @@ exactly that:
 
 - the **generated `android/` Gradle project** (output of `expo prebuild`);
 - the JS source, assets and config needed by Gradle's bundling step;
-- `package.json` + `pnpm-lock.yaml` (the lockfile pins every dependency);
-- a **vendored `node_modules/`** — the full dependency tree committed as
-  files ("vendoring" = committing third-party dependencies into your own repo
-  instead of downloading them at build time);
+- `package.json` + `pnpm-lock.yaml` (the lockfile pins every dependency —
+  `node_modules` itself is **not** committed; F-Droid installs it at build
+  time with `pnpm install --frozen-lockfile` during the recipe's `init` step);
+- an `.npmrc` with `node-linker=hoisted` (see below);
 - Fastlane store metadata (`fastlane/metadata/android/<locale>/`), which
   F-Droid reads from the repo HEAD for the store listing title/descriptions.
 
-### The two build strategies (both validated locally)
+### Why `node-linker=hoisted`
 
-|                             | A — vendored                    | B — install at build time (primary)                         |
-| --------------------------- | ------------------------------- | ----------------------------------------------------------- |
-| Dependencies                | Already committed in the mirror | `pnpm install --frozen-lockfile` during the recipe's `init` |
-| Network installs on F-Droid | None                            | npm registry, pinned by lockfile                            |
-| Recipe needs                | `nodejs` only                   | `nodejs`, `npm`, `pnpm`                                     |
-| Shape for reviewers         | Unusual (63k committed files)   | Standard, widely used pattern                               |
+F-Droid's source scanner resolves **real paths**, but pnpm's default layout
+symlinks every package through `node_modules/.pnpm/<name@version_peerhash>/`,
+whose directory names change whenever the lockfile changes — impossible to
+reference stably from the recipe's `scanignore`/`scandelete` lists (this
+exactly failed in CI: every `scanignore` entry reported "Unused/Non-exist").
+`node-linker=hoisted` makes pnpm produce a flat, symlink-free `node_modules`
+(npm-style), so plain paths like
+`node_modules/react-native/sdks/hermesc/linux64-bin` are real and match.
 
-The submitted recipe uses **B** because it is the shape F-Droid reviewers see
-routinely; A is kept working (the vendored tree stays in the mirror) as a
-no-network alternative that only requires dropping the `init` step.
+An earlier iteration vendored the full `node_modules` into the mirror
+("vendoring" = committing third-party dependencies instead of downloading
+them at build time) and was validated locally, but was dropped: it added 63k
+committed files while the install-at-build-time flow is the standard shape
+F-Droid reviewers see routinely.
 
 ## The prebuilt-binary problem (AARs) and its fix
 
@@ -66,9 +70,10 @@ The fix is Expo's official autolinking option, patched into the mirrored
 
 Every entry is a regex matched against module names; `".*"` forces **all**
 Expo/RN native modules to compile from source (Kotlin + C++/CMake), making the
-prebuilt AARs dead weight. The workflow then strips them from the mirror
-entirely, along with the Windows/macOS Hermes compiler binaries (below), so no
-unused binary blobs are committed for F-Droid's scanner to flag.
+prebuilt AARs dead weight. The recipe's `scandelete: node_modules` then lets
+F-Droid's scanner delete them (and any other flagged blob) after the
+build-time install, without breaking the build — nothing binary is committed
+in the mirror itself.
 
 Verified locally both ways: with the AARs physically deleted (build only
 succeeds if source compilation genuinely works) and with them present but
@@ -82,11 +87,11 @@ with the identical permission surface.
 ahead-of-time compiled to Hermes bytecode by a compiler binary called
 `hermesc`, which react-native ships prebuilt for the three developer
 platforms: `linux64-bin/`, `osx-bin/`, `win64-bin/`. Only the binary matching
-the build machine's OS is ever executed. F-Droid builds on Linux, so the
-mirror strips `win64-bin` and `osx-bin`; `linux64-bin` remains because the
-build genuinely needs it. It is a **build tool** — it never ships inside the
-APK — which is why it is acceptable under `scanignore` while prebuilt app code
-(the AARs) is not.
+the build machine's OS is ever executed. F-Droid builds on Linux: the scanner
+deletes `win64-bin`/`osx-bin` via `scandelete`, while `linux64-bin` is
+protected by `scanignore` because the build genuinely needs it. It is a
+**build tool** — it never ships inside the APK — which is why it is
+acceptable under `scanignore` while prebuilt app code (the AARs) is not.
 
 ## Release flow, end to end
 
@@ -96,8 +101,8 @@ APK — which is why it is acceptable under `scanignore` while prebuilt app code
    patches the tag-derived `versionCode` (`major*10000 + minor*100 + patch`,
    e.g. `v1.3.1` → `10301` — required because `expo prebuild` outside EAS
    always emits a placeholder `versionCode 1`), patches `buildFromSource`,
-   strips the AARs and non-Linux hermesc, and pushes the snapshot to
-   `mirror_app-android` with a matching tag.
+   writes the hoisted-layout `.npmrc`, and pushes the snapshot (without
+   `node_modules`) to `mirror_app-android` with a matching tag.
 3. F-Droid's `checkupdates` sees the new tag (`AutoUpdateMode: Version` /
    `UpdateCheckMode: Tags`), builds from the pinned commit per the recipe,
    signs with F-Droid's key, and publishes.
