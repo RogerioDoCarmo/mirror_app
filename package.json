@@ -74,7 +74,7 @@
     "husky": "^9.1.7",
     "jest-expo": "^54.0.17",
     "lint-staged": "^17.1.0",
-    "markdownlint-cli2": "^0.23.1",
+    "markdownlint-cli2": "^0.23.2",
     "prettier": "^3.9.5",
     "react-test-renderer": "19.1.0",
     "storybook": "^10.5.2",
