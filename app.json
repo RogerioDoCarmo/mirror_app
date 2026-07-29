@@ -41,7 +41,6 @@
           "recordAudioAndroid": false
         }
       ],
-      "@react-native-community/datetimepicker",
       "./plugins/withCleanAndroidPermissions",
       [
         "expo-splash-screen",
