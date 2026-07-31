@@ -33,8 +33,6 @@
     "chromatic": "chromatic --exit-zero-on-changes"
   },
   "dependencies": {
-    "@react-native-community/datetimepicker": "8.4.4",
-    "@react-native-community/slider": "5.0.1",
     "expo": "~54.0.35",
     "expo-camera": "~17.0.10",
     "expo-dev-client": "~6.0.21",
