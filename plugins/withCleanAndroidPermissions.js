@@ -22,6 +22,13 @@ const path = require('path');
  *   - READ/WRITE_EXTERNAL_STORAGE → expo-file-system (legacy storage)
  *   - INTERNET              → React Native core (Metro dev server / debugging)
  *   - ACCESS_NETWORK_STATE  → React Native core (networking stack)
+ *   - VIBRATE               → Expo prebuild's default permission set
+ *
+ * VIBRATE is not requested by app.json (which declares CAMERA alone) and is not
+ * declared by any dependency's manifest — `expo prebuild` injects it into the
+ * generated manifest as part of a default set inherited from Expo Go. Miroji
+ * has no haptics dependency and never calls the Vibration API, so it is dead
+ * weight. Removing it leaves CAMERA as the app's only requested permission.
  *
  * INTERNET and ACCESS_NETWORK_STATE are declared by React Native's own
  * manifest so that debug builds can reach the Metro bundler and the Chrome
@@ -41,6 +48,7 @@ const PERMISSIONS_TO_REMOVE = [
   'android.permission.WRITE_EXTERNAL_STORAGE',
   'android.permission.INTERNET',
   'android.permission.ACCESS_NETWORK_STATE',
+  'android.permission.VIBRATE',
 ];
 
 function buildReleaseManifest() {
