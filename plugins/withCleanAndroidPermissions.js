@@ -20,6 +20,18 @@ const path = require('path');
  *   - SYSTEM_ALERT_WINDOW   → React Native debug / dev tooling
  *   - DUMP                  → dev tooling
  *   - READ/WRITE_EXTERNAL_STORAGE → expo-file-system (legacy storage)
+ *   - INTERNET              → React Native core (Metro dev server / debugging)
+ *   - ACCESS_NETWORK_STATE  → React Native core (networking stack)
+ *
+ * INTERNET and ACCESS_NETWORK_STATE are declared by React Native's own
+ * manifest so that debug builds can reach the Metro bundler and the Chrome
+ * debugger. Miroji itself performs no networking whatsoever — there is no
+ * fetch/XHR/WebSocket call anywhere in `src/`, no analytics, no crash
+ * reporting, no OTA update check — and a release build loads its JS bundle
+ * from the APK's own assets rather than over the network. Keeping either
+ * permission in a shipped build would advertise a capability the app does not
+ * use, which is exactly the kind of thing a privacy-minded user (or an F-Droid
+ * reviewer) is right to question.
  */
 const PERMISSIONS_TO_REMOVE = [
   'android.permission.RECORD_AUDIO',
@@ -27,6 +39,8 @@ const PERMISSIONS_TO_REMOVE = [
   'android.permission.DUMP',
   'android.permission.READ_EXTERNAL_STORAGE',
   'android.permission.WRITE_EXTERNAL_STORAGE',
+  'android.permission.INTERNET',
+  'android.permission.ACCESS_NETWORK_STATE',
 ];
 
 function buildReleaseManifest() {

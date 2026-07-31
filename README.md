@@ -28,8 +28,16 @@
 
 <p align="center">
   <a href="https://apps.apple.com/app/id6774924907"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" height="40" /></a>
-  <a href="https://rogeriodocarmo.com"><img src="assets/badges/google-play-badge.png" alt="Get it on Google Play" height="40" /></a>
 </p>
+
+<!--
+  The "Get it on Google Play" badge is intentionally absent while Android is in
+  closed testing — there is no public listing to link to yet, and the badge
+  previously pointed at a placeholder URL. Restore it once the app reaches
+  production on Google Play:
+
+  <a href="https://play.google.com/store/apps/details?id=com.rogeriodocarmo.miroji"><img src="assets/badges/google-play-badge.png" alt="Get it on Google Play" height="40" /></a>
+-->
 
 <!-- Project Info -->
 

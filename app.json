@@ -2,7 +2,7 @@
   "expo": {
     "name": "Miroji",
     "slug": "mirror-app",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "mirrorapp",
@@ -41,7 +41,6 @@
           "recordAudioAndroid": false
         }
       ],
-      "@react-native-community/datetimepicker",
       "./plugins/withCleanAndroidPermissions",
       [
         "expo-splash-screen",
