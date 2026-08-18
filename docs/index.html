@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Miroji — a fast, private front-camera mirror</title>
+<meta name="description" content="Miroji is a fast, simple, private front-camera mirror for Android and iOS. Nothing is recorded, stored, or sent." />
+<link rel="icon" href="icon.png" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #2f7fd1;
+    --card-bg: #f6f8fa;
+    --border: #e3e6ea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1115;
+      --fg: #f2f2f2;
+      --muted: #a0a0a0;
+      --accent: #6fb0fa;
+      --card-bg: #171a20;
+      --border: #262a32;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 64px 24px 48px;
+    text-align: center;
+  }
+  .icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 22px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  }
+  h1 {
+    font-size: 2rem;
+    margin: 20px 0 8px;
+  }
+  .tagline {
+    color: var(--muted);
+    font-size: 1.05rem;
+    margin: 0 0 32px;
+  }
+  .badges {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .badges img {
+    height: 44px;
+  }
+  .badges a { line-height: 0; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .card p {
+    margin: 0;
+    line-height: 1.5;
+  }
+  .card a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .card a:hover { text-decoration: underline; }
+  footer {
+    margin-top: 40px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  footer a {
+    color: inherit;
+  }
+</style>
+</head>
+<body>
+<main>
+  <img class="icon" src="icon.png" alt="Miroji app icon" />
+  <h1>Miroji</h1>
+  <p class="tagline">A fast, simple, private mirror using your front camera.<br>Nothing is recorded, stored, or sent.</p>
+
+  <div class="badges">
+    <a href="https://apps.apple.com/app/id6774924907">
+      <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" />
+    </a>
+    <a href="https://f-droid.org/packages/com.rogeriodocarmo.miroji/">
+      <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" />
+    </a>
+  </div>
+
+  <div class="card">
+    <h2>Privacy Policy</h2>
+    <p>Miroji collects nothing. Read the full policy — <a href="privacy-policy.html">privacy-policy.html</a>.</p>
+  </div>
+
+  <div class="card">
+    <h2>Source &amp; Technical Details</h2>
+    <p>Miroji is open source. The main repository, quality tooling, and CI/CD are on <a href="https://github.com/RogerioDoCarmo/mirror_app">GitHub</a>. The F-Droid build — a from-source, Google-free variant — is documented in <a href="https://github.com/RogerioDoCarmo/mirror_app/blob/main/docs/FDROID.md">FDROID.md</a>.</p>
+  </div>
+
+  <footer>
+    MIT License · <a href="https://github.com/RogerioDoCarmo/mirror_app">github.com/RogerioDoCarmo/mirror_app</a>
+  </footer>
+</main>
+</body>
+</html>
