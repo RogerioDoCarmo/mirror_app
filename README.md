@@ -25,6 +25,7 @@
 [![React Native](https://img.shields.io/badge/React_Native-0.81-61dafb?logo=react)](https://reactnative.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-10.x-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![macOS](https://img.shields.io/badge/macOS-Apple_Silicon-000000?logo=apple&logoColor=white)](https://developer.apple.com/help/app-store-connect/manage-your-apps-availability/manage-availability-of-iphone-and-ipad-apps-on-macs-with-apple-silicon)
 
 <!-- Store Availability -->
 
@@ -90,6 +91,14 @@ Miroji is published on [F-Droid](https://f-droid.org/packages/com.rogeriodocarmo
 The result is a build with **zero anti-features** on its F-Droid listing, requesting exactly one permission — `CAMERA` — and nothing else. No network access, no storage, no analytics. At 20 MB it is roughly a third the size of the equivalent Play Store build, having dropped the emulator-only ABIs and the proprietary components.
 
 [`docs/FDROID.md`](docs/FDROID.md) documents the full setup: the dual-repository mirror, the source-build configuration, and the packaging decisions behind it.
+
+---
+
+## On macOS
+
+Miroji also runs unmodified on Apple Silicon Macs, distributed through the same App Store listing as the iPhone app. This isn't a separate build or a Catalyst port — Apple Silicon Macs can run compatible iPhone binaries natively, since both share the same ARM64 architecture, and Apple opts every eligible app into this automatically.
+
+It works out well here specifically because the core feature translates directly: `facing: "front"` resolves to whichever front-facing camera the OS reports, which on a MacBook is the built-in FaceTime camera — the same "look at yourself" position as a phone's selfie camera. Verified working and marked as **Verified Compatible** in App Store Connect, which removes the default "Not verified for macOS" label Apple applies to every app in this category until the developer confirms it.
 
 ---
 
