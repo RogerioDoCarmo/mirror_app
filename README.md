@@ -28,6 +28,7 @@
 
 <p align="center">
   <a href="https://apps.apple.com/app/id6774924907"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" height="40" /></a>
+  <a href="https://f-droid.org/packages/com.rogeriodocarmo.miroji/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="40" /></a>
 </p>
 
 <!--
@@ -75,6 +76,18 @@ The app's functionality is intentionally simple. The focus of this project is **
 ## Motivation
 
 This project serves as a portfolio piece to demonstrate mobile development best practices in a public, auditable codebase. It covers the full lifecycle of a mobile app: local development, automated quality gates, and deployment to both the Apple App Store and Google Play.
+
+---
+
+## On F-Droid
+
+Miroji is published on [F-Droid](https://f-droid.org/packages/com.rogeriodocarmo.miroji/), which builds every app from source on its own infrastructure and refuses to ship proprietary dependencies. Getting an Expo application through that process took real work.
+
+`expo-camera` hard-depends on Google's MLKit and Play Services for barcode scanning — components F-Droid will not build. Miroji applies a [patch](patches/) at F-Droid build time that removes them while preserving the module's public API, so the camera behaves identically with no Google code in the binary. Every Expo and React Native module is then compiled from source rather than consumed as a prebuilt AAR.
+
+The result is a build with **zero anti-features** on its F-Droid listing, requesting exactly one permission — `CAMERA` — and nothing else. No network access, no storage, no analytics. At 20 MB it is roughly a third the size of the equivalent Play Store build, having dropped the emulator-only ABIs and the proprietary components.
+
+[`docs/FDROID.md`](docs/FDROID.md) documents the full setup: the dual-repository mirror, the source-build configuration, and the packaging decisions behind it.
 
 ---
 
