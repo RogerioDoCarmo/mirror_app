@@ -80,6 +80,8 @@ The app's functionality is intentionally simple. The focus of this project is **
 
 This project serves as a portfolio piece to demonstrate mobile development best practices in a public, auditable codebase. It covers the full lifecycle of a mobile app: local development, automated quality gates, and deployment to both the Apple App Store and Google Play.
 
+A write-up covering the architecture, the testing tiers, and what it took to get an Expo application into F-Droid was published on [LinkedIn](https://www.linkedin.com/posts/rogeriodocarmo_miroji-app-app-store-activity-7498514634862325761-D2bQ) (in Portuguese).
+
 ---
 
 ## On F-Droid
