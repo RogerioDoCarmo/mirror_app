@@ -1,0 +1,95 @@
+# Repairs the pnpm lockfile on Dependabot pull requests.
+#
+# Dependabot does not understand `pnpm.overrides`. When it regenerates
+# pnpm-lock.yaml it drops the `overrides:` block entirely, while package.json
+# still declares all of them. The tree then re-resolves with nothing enforcing
+# the version floors, which has twice let packages back in below the versions
+# those overrides exist to exclude (postcss 8.4.49, fast-uri 3.1.6).
+#
+# `pnpm install --frozen-lockfile` in the CI workflow catches this every time
+# and fails with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH, so nothing unsafe can merge.
+# That guardrail is doing its job — this workflow just removes the manual repair
+# it would otherwise demand on every single dependency PR.
+name: Dependabot Lockfile
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+# Needed to push the repaired lockfile back onto the Dependabot branch.
+# Dependabot runs get a read-only token by default; this raises it for this
+# workflow only.
+permissions:
+  contents: write
+
+concurrency:
+  group: dependabot-lockfile-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  repair:
+    name: Repair pnpm overrides
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Checkout the pull request branch
+        uses: actions/checkout@v7
+        with:
+          # Check out the PR branch itself rather than the merge commit, so the
+          # repaired lockfile can be pushed straight back to it.
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Reapply overrides from package.json
+        # --no-frozen-lockfile is the point: it rewrites the lockfile from the
+        # manifest, which restores the overrides block Dependabot discarded.
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Verify the overrides survived
+        # If pnpm ever stops recording overrides in the lockfile, fail loudly
+        # here rather than pushing a lockfile that silently enforces nothing.
+        run: |
+          declared=$(node -p "Object.keys(require('./package.json').pnpm?.overrides ?? {}).length")
+          if [ "$declared" -eq 0 ]; then
+            echo "package.json declares no pnpm.overrides — nothing to protect."
+            exit 0
+          fi
+          if ! grep -q '^overrides:' pnpm-lock.yaml; then
+            echo "::error::package.json declares $declared overrides but the regenerated lockfile has no overrides block."
+            exit 1
+          fi
+          echo "$declared overrides declared and recorded in the lockfile."
+
+      - name: Confirm the lockfile is now internally consistent
+        # The exact check CI runs. If this passes, the PR will too.
+        run: pnpm install --frozen-lockfile
+
+      - name: Commit and push if the lockfile changed
+        run: |
+          if git diff --quiet -- pnpm-lock.yaml; then
+            echo "Lockfile already consistent — nothing to repair."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git commit -m "fix(deps): restore pnpm overrides dropped by Dependabot
+
+          Dependabot regenerated pnpm-lock.yaml without the overrides block
+          declared in package.json. Reapplied with a non-frozen install so the
+          version floors are enforced again.
+
+          Committed automatically by .github/workflows/dependabot-lockfile.yml"
+          git push
+          echo "Repaired lockfile pushed to ${{ github.head_ref }}."
