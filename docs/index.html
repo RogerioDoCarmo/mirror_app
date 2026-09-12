@@ -66,6 +66,28 @@
     height: 44px;
   }
   .badges a { line-height: 0; }
+  .buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .buttons a {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .buttons a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
   .card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -116,6 +138,13 @@
     <a href="https://f-droid.org/packages/com.rogeriodocarmo.miroji/">
       <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" />
     </a>
+  </div>
+
+  <div class="buttons">
+    <a href="https://apps.apple.com/app/id6774924907">App Store</a>
+    <a href="https://play.google.com/store/apps/details?id=com.rogeriodocarmo.miroji">Google Play</a>
+    <a href="https://f-droid.org/packages/com.rogeriodocarmo.miroji/">F-Droid</a>
+    <a href="https://github.com/RogerioDoCarmo/mirror_app">Repository</a>
   </div>
 
   <div class="card">
