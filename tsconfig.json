@@ -12,6 +12,15 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.d.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    // TypeScript's `**` never descends into a dot-directory, so
+    // .github/workflows/paid-builds.test.ts has to be named explicitly.
+    // Without this line both `tsc --noEmit` and ESLint's type-aware rules
+    // report it as a file outside the project and refuse to check it at all.
+    ".github/**/*.ts",
+    ".expo/types/**/*.d.ts"
+  ],
   "exclude": ["node_modules", "coverage", ".stryker-tmp"]
 }
