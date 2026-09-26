@@ -48,6 +48,11 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # ⚠️ `--local` keeps E2E off the EAS allowance. This job runs on every
+      # push AND every pull request to main and develop, so without that flag it
+      # would be the single largest consumer of build credits in the repository
+      # — and the "e2e" profile extends "preview", which sets no autoIncrement,
+      # so it never touches the remote version counter either.
       - name: Build iOS app for simulator (EAS)
         run: eas build --platform ios --profile e2e --local --non-interactive
 
@@ -177,6 +182,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # ⚠️ `--local`: see the iOS job above.
       - name: Build Android APK (EAS)
         run: eas build --platform android --profile e2e --local --non-interactive
 

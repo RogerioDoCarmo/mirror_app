@@ -5,9 +5,28 @@ name: Chromatic
 # React Native Storybook is unaffected — Chromatic snapshots the web build
 # produced by `pnpm build-storybook` (@storybook/react-native-web-vite).
 
+# ⚠️ NOT on pushes to develop. Every commit that reaches develop arrives
+# through a pull request, and that pull request already published a Chromatic
+# build for exactly that tree — so the push run re-snapshots work that has just
+# been snapshotted, and bills for it. The website repo reached the same
+# conclusion about its Storybook job in the same words: four Chromatic builds
+# per change instead of two, while telling us nothing new.
+#
+# ⚠️ main KEEPS its push trigger, and not by omission. The README badge points
+# at <https://main--6a2ef191cad660cc8d53a313.chromatic.com>, which is Chromatic's
+# permalink to the latest build *on the branch main*. A pull request build is
+# filed under its head branch (release/1.3.6, feature/…), never under its base,
+# so if nothing ever builds on main that link freezes at whatever was published
+# last and then rots. One build per release is the price of the published
+# Storybook, and it buys something the PR builds do not.
+#
+# The one thing the dropped develop run was quietly covering: Dependabot pull
+# requests are skipped below (no project token), so a dependency bump gets its
+# first visual check on the next push to main rather than on the merge to
+# develop. Later, not never.
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main, develop]
 
@@ -56,4 +75,12 @@ jobs:
           exitZeroOnChanges: true
           # TurboSnap: only re-snapshot stories whose code actually changed,
           # to conserve the monthly snapshot quota.
+          #
+          # ⚠️ It is not a cap. TurboSnap falls back to a FULL build by design
+          # whenever package.json or .storybook/** changes, because it can no
+          # longer trust the Vite dependency graph — so every Dependabot bump
+          # and every Storybook config tweak snapshots every story. That is
+          # cheap today (two stories) and stops being cheap silently as stories
+          # are added, which is the reason the trigger above is kept narrow
+          # rather than leaning on onlyChanged to do the saving.
           onlyChanged: true

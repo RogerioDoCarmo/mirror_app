@@ -33,7 +33,14 @@ const config = {
   // any other project-root directory during regular runs.  This also lets
   // Stryker's jest-runner work correctly inside its sandbox: the sandbox root
   // is treated as <rootDir> and <rootDir>/src contains the instrumented tests.
-  roots: ['<rootDir>/src'],
+  //
+  // `.github` is listed alongside it so .github/workflows/paid-builds.test.ts
+  // actually runs.  Those assertions guard spend decisions — which triggers may
+  // start a paid EAS build or a Chromatic snapshot — and a spend decision leaves
+  // no trace in the app, so nothing else in the suite would notice one being
+  // undone.  Still not <rootDir> itself: that is the path that reaches
+  // .stryker-tmp/.
+  roots: ['<rootDir>/src', '<rootDir>/.github'],
   testPathIgnorePatterns: ['/node_modules/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
