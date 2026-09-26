@@ -108,6 +108,13 @@ jobs:
       # Builds a signed APK locally on the runner.  Firebase App Distribution
       # requires an APK (not AAB), which is why the "firebase" profile sets
       # buildType: "apk" in eas.json.
+      #
+      # ⚠️ `--local` is the whole reason this workflow is free. Drop that flag
+      # and every version bump merged to develop buys two remote EAS build
+      # credits instead of borrowing a GitHub runner. The "firebase" profile
+      # also deliberately omits `autoIncrement`, so this path never moves the
+      # remote versionCode/buildNumber either — only the production profile
+      # does. Both facts are asserted in .github/workflows/paid-builds.test.ts.
       - name: Build Android APK (local)
         run: eas build --platform android --profile firebase --local --non-interactive
 
@@ -176,6 +183,10 @@ jobs:
       # distribution certificate and ad-hoc provisioning profile (scoped to
       # registered tester UDIDs) from its credential store, so no manual
       # certificate handling is required here.
+      #
+      # ⚠️ `--local` again: see the Android job. Credentials come from EAS, the
+      # compute does not, and that is the difference between a free tester build
+      # and an iOS build credit on every bump.
       - name: Build iOS IPA (ad-hoc, local)
         run: eas build --platform ios --profile firebase --local --non-interactive
 
