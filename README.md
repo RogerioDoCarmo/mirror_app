@@ -207,7 +207,8 @@ src/
 ├── ci.yml                    # lint + typecheck + unit tests + mutation tests (every PR)
 ├── e2e.yml                   # Maestro flows on iOS simulator and Android emulator
 ├── firebase-distribution.yml # beta builds to Firebase App Distribution (push to develop)
-└── eas-build.yml             # EAS build + store submission (push to main)
+├── chromatic.yml             # Storybook visual snapshots (every PR; pushes to main only)
+└── eas-build.yml             # EAS build + store submission (manual dispatch only)
 
 .maestro/flows/               # end-to-end test flows (YAML)
 ```
@@ -236,7 +237,18 @@ Lint → Typecheck → Unit/Integration Tests → Mutation Tests
 
 Pull requests into `main` additionally trigger E2E tests on both platforms.
 
-Pushing to `main` triggers an EAS production build and automatic submission to both stores.
+Nothing in the repository starts a **paid** EAS build. `eas-build.yml` is
+`workflow_dispatch` only, and its build job is gated behind a `credits_available`
+confirmation, because `eas.json` sets `appVersionSource: "remote"` and EAS
+increments the remote `versionCode`/`buildNumber` _before_ it checks the plan — a
+refused build still burns both numbers permanently. Store submission is a
+separate opt-in input on the same dispatch, never automatic.
+
+The builds that do run automatically — beta distribution on a version bump, and
+E2E on every push and pull request — all pass `--local`, so they use a GitHub
+runner rather than a build credit, and their EAS profiles set no
+`autoIncrement`, so they never move the remote counter either. See
+`.github/workflows/paid-builds.test.ts`, which asserts each of those properties.
 
 ---
 

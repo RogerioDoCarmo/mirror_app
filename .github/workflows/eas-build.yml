@@ -1,19 +1,35 @@
 name: EAS Build & Submit
 
+# ⚠️ NOTHING AUTOMATIC STARTS A PAID BUILD HERE. This workflow is dispatch-only
+# on purpose, and the purpose has an autopsy behind it in both repositories.
+#
+# It used to run on every push to main that touched src/**, app.json,
+# package.json or the lockfile — path-filtered, which reads as careful and is
+# not. main here is fed by "Merge pull request #NNN from RogerioDoCarmo/develop"
+# merges, and those merges touch package.json or the lockfile nearly every time
+# (#162, #164 and #167 all did). Each match ran `eas build --platform all`: two
+# remote builds, one Android and one iOS, bought for a dependency bump nobody
+# thought of as a release.
+#
+# ⚠️ THE NUMBERS, READ OFF THIS REPOSITORY'S OWN RUN HISTORY. In 47 runs of this
+# workflow, every single one was triggered by a push and not one by a human. 30
+# of them finished, which is roughly 60 build credits nobody requested. 16
+# failed, and six of those failed the expensive way described below — four of
+# them in a single afternoon on 12 September.
+#
+# The sibling repo morse_app carried the identical trigger and narrowed it to
+# release tags after five merges in one evening cost seven iOS builds out of
+# fifteen a month. Here it is narrowed further, to `workflow_dispatch`, because a
+# tag is still a git operation nobody associates with a spend, and both binaries
+# can be produced for nothing: `pnpm build:aab:local` / `pnpm build:ipa:local`,
+# and the Mac archives the IPA in Xcode. EAS earns its credit only when neither
+# machine can do the job.
+#
+# ⚠️ `cancel-in-progress` below does NOT refund anything. A remote EAS build
+# runs on EAS infrastructure, not on this runner; cancelling the Actions run
+# abandons the log, not the build, and the credit is already gone. That is why
+# the fix had to be at the trigger and not at the concurrency group.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'App.tsx'
-      - 'index.ts'
-      - 'assets/**'
-      - 'app.json'
-      - 'eas.json'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'plugins/**'
-      - 'metro.config.js'
   workflow_dispatch:
     inputs:
       platform:
@@ -27,6 +43,12 @@ on:
         required: true
         default: false
         type: boolean
+      credits_available:
+        description: 'EAS credits confirmed remaining? (see the paid-builds notes)'
+        required: true
+        default: 'no'
+        type: choice
+        options: ['no', 'yes']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,9 +60,64 @@ permissions:
   contents: read
 
 jobs:
+  # ⚠️ THE BUILD NUMBER IS SPENT BEFORE THE CREDIT IS CHECKED.
+  #
+  # eas.json sets `appVersionSource: "remote"` and the production profile sets
+  # `autoIncrement: true`, so EAS holds versionCode/buildNumber and increments
+  # them as the first thing `eas build` does — then checks the plan.
+  #
+  # ⚠️ It has already happened here six times. The run for #167 on 20 September
+  # logged `✔ Incremented versionCode from 56 to 57` at 20:00:24 and, three
+  # seconds later, `This account has used its builds from the Free plan this
+  # month`, then `Error: build command failed.` Identical shape on 48→49, 49→50,
+  # 52→53, 54→55 and 55→56. Six Android versionCodes spent on nothing, and
+  # nothing in a repository can put them back — morse_app lost Android 16 and
+  # iOS 19 the same way on 23 September.
+  #
+  # So the question "are there credits?" has to be answered BEFORE EAS is asked
+  # for a build number, and the only place that can happen is here, in front of
+  # the job that runs the CLI. There is no EAS command that reports the
+  # remaining allowance, so this is a human answer typed at dispatch time rather
+  # than something queried — the value of it is that the counter cannot move
+  # without someone having looked at the plan page first.
+  #
+  # Same shape as check-version in firebase-distribution.yml: a gate job that
+  # skips the expensive job cleanly instead of failing it red, so a deliberate
+  # "not now" does not look like a broken pipeline.
+  check-credits:
+    name: Check EAS credits were confirmed
+    runs-on: ubuntu-latest
+    outputs:
+      confirmed: ${{ steps.check.outputs.confirmed }}
+    steps:
+      - name: Require an explicit confirmation before EAS allocates a version
+        id: check
+        env:
+          CONFIRMED: ${{ inputs.credits_available }}
+        run: |
+          if [ "$CONFIRMED" = "yes" ]; then
+            echo "Credits confirmed; the build may ask EAS for a version."
+            echo "confirmed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "confirmed=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "### No build was started"
+            echo
+            echo "\`credits_available\` was **$CONFIRMED**, so this run stopped"
+            echo "before the CLI could ask EAS for a version — the remote"
+            echo "versionCode/buildNumber is untouched. Read the remaining"
+            echo "allowance on the EAS plan page, then dispatch again with"
+            echo "\`yes\`."
+            echo
+            echo "Neither counter has moved."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   build:
     name: Build (${{ inputs.platform || 'all' }})
     runs-on: ubuntu-latest
+    needs: check-credits
+    if: needs.check-credits.outputs.confirmed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v7

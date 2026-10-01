@@ -5,11 +5,34 @@ name: Chromatic
 # React Native Storybook is unaffected — Chromatic snapshots the web build
 # produced by `pnpm build-storybook` (@storybook/react-native-web-vite).
 
+# ⚠️ DISPATCH ONLY. NOTHING AUTOMATIC SPENDS A SNAPSHOT.
+#
+# This ran on pull requests into main and develop, and on pushes to main. Both
+# were defensible and both spent the monthly allowance without anyone asking:
+# of the last 200 runs, 91 came from pushes and 109 from pull requests, and not
+# one from a person deciding a visual check was worth buying.
+#
+# Chromatic bills per SNAPSHOT — one per story per build, multiplied by the
+# viewports and modes configured — so "one more build" is not one more anything.
+# It is cheap here today, with two story files and a single mode, and it stops
+# being cheap silently as stories are added. The trigger is the place to hold
+# that, not a hope that the story count stays small.
+#
+# ⚠️ TWO THINGS ARE LOST, AND THEY ARE REAL.
+#
+# 1. Pull requests no longer get an automatic visual check. A regression now
+#    waits for somebody to dispatch this, or reaches main unnoticed.
+#
+# 2. The README badge points at Chromatic's permalink to the latest build on
+#    BRANCH MAIN. A pull request build is filed under its head branch, never its
+#    base, so with nothing building on main that link freezes at whatever was
+#    published last and then rots. Dispatching this from main after a release
+#    keeps it alive; forgetting to is how it goes stale.
+#
+# Both were accepted deliberately on 1 October 2026: the allowance is the scarce
+# thing, and a snapshot nobody asked for is the easiest place to stop spending it.
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  workflow_dispatch:
 
 concurrency:
   group: chromatic-${{ github.ref }}
@@ -56,4 +79,12 @@ jobs:
           exitZeroOnChanges: true
           # TurboSnap: only re-snapshot stories whose code actually changed,
           # to conserve the monthly snapshot quota.
+          #
+          # ⚠️ It is not a cap. TurboSnap falls back to a FULL build by design
+          # whenever package.json or .storybook/** changes, because it can no
+          # longer trust the Vite dependency graph — so every Dependabot bump
+          # and every Storybook config tweak snapshots every story. That is
+          # cheap today (two stories) and stops being cheap silently as stories
+          # are added, which is the reason the trigger above is kept narrow
+          # rather than leaning on onlyChanged to do the saving.
           onlyChanged: true
