@@ -173,26 +173,35 @@ describe('Chromatic is not billed twice for the same tree', () => {
    * second snapshot of work nothing had changed. The website repo put the same
    * finding in the same words about its Storybook job: four Chromatic builds
    * per change instead of two, while telling us nothing new.
+   *
+   * ⚠️ THAT NARROWING WAS NOT ENOUGH. Of the last 200 runs, 91 came from
+   * pushes and 109 from pull requests — not one from a person deciding a visual
+   * check was worth buying. Chromatic bills per SNAPSHOT, one per story per
+   * build times the viewports and modes, so this is cheap only while the story
+   * count is small and stops being cheap silently. The trigger is where that is
+   * held.
    */
-  it('does not snapshot pushes to develop', () => {
-    expect(triggerBlock(CHROMATIC)).toContain('branches: [main]');
-    expect(triggerBlock(CHROMATIC)).not.toContain('push:\n    branches: [main, develop]');
+  it('snapshots nothing automatically', () => {
+    // ⚠️ The ONLY trigger, not merely one of them. Asserting that
+    // `workflow_dispatch` is present passes on the version this replaced, which
+    // had it alongside `push` and `pull_request`.
+    expect(triggers(CHROMATIC)).toStrictEqual(['workflow_dispatch']);
   });
 
   /**
-   * ⚠️ main's push run is NOT the same waste, and deleting it breaks something
-   * visible. Chromatic files a pull request build under its head branch, never
-   * its base, so the `main--…` permalink the README badge points at is fed only
-   * by pushes to main. No build on main, no published Storybook.
+   * ⚠️ WHAT THIS COSTS, kept as a test so it cannot be forgotten.
+   *
+   * Chromatic files a pull request build under its HEAD branch, never its base,
+   * so the `main--…` permalink the README badge points at was fed only by
+   * pushes to main. Nothing feeds it now, which means the published Storybook
+   * link freezes at whatever was last published unless someone dispatches this
+   * workflow from main after a release.
+   *
+   * The badge is asserted to still exist, so that if it is ever removed this
+   * test fails and somebody re-reads why it was here.
    */
-  it('keeps the push run on main that feeds the published Storybook link', () => {
-    expect(triggers(CHROMATIC)).toContain('push');
+  it('still carries the badge whose link now depends on a dispatch', () => {
     expect(README).toContain('main--6a2ef191cad660cc8d53a313.chromatic.com');
-  });
-
-  it('still snapshots pull requests into both long-lived branches', () => {
-    expect(triggers(CHROMATIC)).toContain('pull_request');
-    expect(triggerBlock(CHROMATIC)).toContain('branches: [main, develop]');
   });
 
   // TurboSnap is not a cap — it falls back to a full build whenever
