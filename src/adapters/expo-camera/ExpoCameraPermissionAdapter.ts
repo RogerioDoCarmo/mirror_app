@@ -53,11 +53,13 @@ export function useExpoCameraPermission(): ICameraPermissionPort {
     };
   }, [rawPermission]);
 
-  const permission: PermissionState = rawPermission
-    ? { granted: rawPermission.granted, canAskAgain: rawPermission.canAskAgain }
-    : timedOut
-      ? { granted: false, canAskAgain: true } // Native module timed out — assume undetermined
-      : null;
+  let permission: PermissionState = null;
+  if (rawPermission) {
+    permission = { granted: rawPermission.granted, canAskAgain: rawPermission.canAskAgain };
+  } else if (timedOut) {
+    // Native module timed out — assume undetermined
+    permission = { granted: false, canAskAgain: true };
+  }
 
   // Stabilise the reference across re-renders so consumers that compare by
   // identity (e.g. React.memo, useCallback dependency arrays) do not re-run
