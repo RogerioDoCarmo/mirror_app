@@ -143,7 +143,11 @@ describe('PermissionGate', () => {
   describe('when permission is permanently denied (canAskAgain false)', () => {
     const blockedPermission = { granted: false, canAskAgain: false };
 
-    it('shows the rationale message', () => {
+    it.each([
+      ['shows the rationale message', 'permission.cameraRequired'],
+      ['shows a settings guidance message', 'permission.openSettings'],
+      ['shows the open settings button', 'permission.openSettingsButton'],
+    ] as const)('%s', (_title, key) => {
       render(
         <PermissionGate
           permission={blockedPermission}
@@ -154,7 +158,7 @@ describe('PermissionGate', () => {
         </PermissionGate>,
         { wrapper },
       );
-      expect(screen.getByText(en['permission.cameraRequired'])).toBeTruthy();
+      expect(screen.getByText(en[key])).toBeTruthy();
     });
 
     it('does not show the grant button', () => {
@@ -169,34 +173,6 @@ describe('PermissionGate', () => {
         { wrapper },
       );
       expect(screen.queryByText(en['permission.grantButton'])).toBeNull();
-    });
-
-    it('shows a settings guidance message', () => {
-      render(
-        <PermissionGate
-          permission={blockedPermission}
-          onRequest={mockOnRequest}
-          onOpenSettings={mockOnOpenSettings}
-        >
-          <Child />
-        </PermissionGate>,
-        { wrapper },
-      );
-      expect(screen.getByText(en['permission.openSettings'])).toBeTruthy();
-    });
-
-    it('shows the open settings button', () => {
-      render(
-        <PermissionGate
-          permission={blockedPermission}
-          onRequest={mockOnRequest}
-          onOpenSettings={mockOnOpenSettings}
-        >
-          <Child />
-        </PermissionGate>,
-        { wrapper },
-      );
-      expect(screen.getByText(en['permission.openSettingsButton'])).toBeTruthy();
     });
 
     it('calls onOpenSettings when the open settings button is pressed', () => {

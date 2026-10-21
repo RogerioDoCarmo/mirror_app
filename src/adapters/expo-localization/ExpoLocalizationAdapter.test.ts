@@ -96,45 +96,42 @@ describe('useExpoLocalization', () => {
     expect(locale).toBe('es');
   });
 
-  it('t() returns the English string for a valid key when locale is "en"', () => {
-    mockGetLocales.mockReturnValue([makeLocale('en')]);
-
-    const { t } = useExpoLocalization();
-
-    expect(t('permission.grantButton')).toBe('Continue');
-  });
-
-  it('t() returns the Portuguese string for a valid key when locale is "pt"', () => {
-    mockGetLocales.mockReturnValue([makeLocale('pt')]);
-
-    const { t } = useExpoLocalization();
-
-    expect(t('permission.grantButton')).toBe('Continuar');
-  });
-
-  it('t() returns the Spanish string for a valid key when locale is "es"', () => {
-    mockGetLocales.mockReturnValue([makeLocale('es')]);
-
-    const { t } = useExpoLocalization();
-
-    expect(t('permission.cameraRequired')).toBe('Se requiere acceso a la cámara para usar Miroji.');
-  });
-
-  it('t() returns the Japanese string for a valid key when locale is "ja"', () => {
-    mockGetLocales.mockReturnValue([makeLocale('ja')]);
-
-    const { t } = useExpoLocalization();
-
-    expect(t('permission.openSettings')).toBe(
+  it.each([
+    [
+      't() returns the English string for a valid key when locale is "en"',
+      'en',
+      'permission.grantButton',
+      'Continue',
+    ],
+    [
+      't() returns the Portuguese string for a valid key when locale is "pt"',
+      'pt',
+      'permission.grantButton',
+      'Continuar',
+    ],
+    [
+      't() returns the Spanish string for a valid key when locale is "es"',
+      'es',
+      'permission.cameraRequired',
+      'Se requiere acceso a la cámara para usar Miroji.',
+    ],
+    [
+      't() returns the Japanese string for a valid key when locale is "ja"',
+      'ja',
+      'permission.openSettings',
       'デバイスの設定でカメラへのアクセスを有効にしてください。',
-    );
-  });
-
-  it('t() falls back to English when locale is unsupported', () => {
-    mockGetLocales.mockReturnValue([makeLocale('de')]);
+    ],
+    [
+      't() falls back to English when locale is unsupported',
+      'de',
+      'permission.grantButton',
+      'Continue',
+    ],
+  ] as const)('%s', (_title, languageCode, key, expected) => {
+    mockGetLocales.mockReturnValue([makeLocale(languageCode)]);
 
     const { t } = useExpoLocalization();
 
-    expect(t('permission.grantButton')).toBe('Continue');
+    expect(t(key)).toBe(expected);
   });
 });

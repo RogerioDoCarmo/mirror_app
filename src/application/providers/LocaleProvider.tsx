@@ -21,7 +21,7 @@ export type LocaleProviderProps = {
  * (`@/adapters/expo-localization/ExpoLocalizationAdapter`) and render a
  * `LocaleProvider` around the component under test.
  */
-export function LocaleProvider({ children }: LocaleProviderProps) {
+export function LocaleProvider({ children }: Readonly<LocaleProviderProps>) {
   const value = useExpoLocalization();
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }

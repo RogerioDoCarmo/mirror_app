@@ -21,7 +21,7 @@ export type CameraProviderProps = {
  * (`@/adapters/expo-camera/ExpoCameraPermissionAdapter`) and render a
  * `CameraProvider` around the component under test.
  */
-export function CameraProvider({ children }: CameraProviderProps) {
+export function CameraProvider({ children }: Readonly<CameraProviderProps>) {
   const value = useExpoCameraPermission();
   return (
     <CameraPermissionContext.Provider value={value}>{children}</CameraPermissionContext.Provider>
