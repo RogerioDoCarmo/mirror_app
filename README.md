@@ -32,7 +32,7 @@
 <p align="center">
   <a href="https://apps.apple.com/app/id6774924907"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" height="40" /></a>
   <a href="https://play.google.com/store/apps/details?id=com.rogeriodocarmo.miroji"><img src="assets/badges/google-play-badge.png" alt="Get it on Google Play" height="40" /></a>
-  <a href="https://f-droid.org/packages/com.rogeriodocarmo.miroji/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="40" /></a>
+  <a href="https://f-droid.org/packages/com.rogeriodocarmo.miroji/"><img src="assets/badges/f-droid-badge.png" alt="Get it on F-Droid" height="40" /></a>
 </p>
 
 <!-- Project Info -->
