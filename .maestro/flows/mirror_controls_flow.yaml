@@ -1,0 +1,63 @@
+appId: com.rogeriodocarmo.miroji
+---
+# Pre-grant camera permission at the OS level so this flow always starts
+# on the camera screen, independent of mirror_permission_flow.
+# clearState is intentionally omitted — see mirror_permission_flow.yaml.
+- launchApp:
+    permissions:
+      camera: allow
+
+# CI runners are slow; see mirror_camera_flow.yaml for the 120 s rationale.
+- extendedWaitUntil:
+    visible:
+      text: 'camera-view'
+    timeout: 120000
+
+# The two floating controls are matched by testID (`id:`), NOT by text.  Their
+# accessibilityLabel is localised (and the mirror toggle's changes with its
+# state), so a text: match would break whenever the CI device is not in English.
+# The pinch gesture itself cannot be driven by Maestro; its behaviour is covered
+# by unit and integration tests.
+- assertVisible:
+    id: 'camera-flip-button'
+
+- assertVisible:
+    id: 'mirror-toggle-button'
+
+- takeScreenshot: controls-initial
+
+# Tapping the camera switch must keep the preview on screen (the camera
+# re-initialises for the other lens).
+- tapOn:
+    id: 'camera-flip-button'
+
+- extendedWaitUntil:
+    visible:
+      text: 'camera-view'
+    timeout: 60000
+
+# The controls are still there and tappable after the switch.
+- assertVisible:
+    id: 'camera-flip-button'
+
+# Flipping the preview is a pure visual change: the camera stays mounted.
+- tapOn:
+    id: 'mirror-toggle-button'
+
+- assertVisible:
+    text: 'camera-view'
+
+- assertVisible:
+    id: 'mirror-toggle-button'
+
+# And back again.
+- tapOn:
+    id: 'mirror-toggle-button'
+
+- tapOn:
+    id: 'camera-flip-button'
+
+- assertVisible:
+    text: 'camera-view'
+
+- takeScreenshot: controls-final
