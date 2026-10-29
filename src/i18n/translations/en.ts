@@ -6,4 +6,7 @@ export const en: TranslationMap = {
   'permission.grantButton': 'Continue',
   'permission.openSettings': 'Please enable camera access in your device settings.',
   'permission.openSettingsButton': 'Open Settings',
+  'camera.switchCamera': 'Switch camera',
+  'camera.showMirrorView': 'Show mirror view',
+  'camera.showAsOthersSeeYou': 'Show as others see you',
 };

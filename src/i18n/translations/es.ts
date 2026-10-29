@@ -7,4 +7,7 @@ export const es: TranslationMap = {
   'permission.openSettings':
     'Por favor, habilita el acceso a la cámara en la configuración de tu dispositivo.',
   'permission.openSettingsButton': 'Abrir Configuración',
+  'camera.switchCamera': 'Cambiar de cámara',
+  'camera.showMirrorView': 'Mostrar vista de espejo',
+  'camera.showAsOthersSeeYou': 'Mostrar como te ven los demás',
 };
