@@ -33,10 +33,12 @@
     "chromatic": "chromatic --exit-zero-on-changes"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.3",
     "expo": "~54.0.35",
     "expo-build-properties": "~1.0.10",
     "expo-camera": "~17.0.10",
     "expo-dev-client": "~6.0.21",
+    "expo-file-system": "~19.0.24",
     "expo-localization": "^17.0.9",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
@@ -110,6 +112,9 @@
       "@istanbuljs/load-nyc-config>js-yaml": "^3.15.2",
       "@expo/xcpretty>js-yaml": "^4.3.2",
       "@eslint/eslintrc>js-yaml": "^4.3.2"
+    },
+    "patchedDependencies": {
+      "expo-camera": "patches/expo-camera.patch"
     }
   }
 }

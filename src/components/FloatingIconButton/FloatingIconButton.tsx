@@ -1,10 +1,14 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+/** Name of an Ionicons glyph. */
+export type FloatingIconName = React.ComponentProps<typeof Ionicons>['name'];
 
 /** Props accepted by the {@link FloatingIconButton} component. */
 type Props = Readonly<{
-  /** Single-glyph icon drawn inside the button. */
-  icon: string;
+  /** Ionicons glyph drawn inside the button. */
+  icon: FloatingIconName;
   /** Localised accessible name announced by screen readers (the button shows only an icon). */
   label: string;
   /** Callback invoked when the button is pressed. */
@@ -18,14 +22,19 @@ type Props = Readonly<{
 /** Edge length of the round button; above the 44pt / 48dp minimum touch target. */
 const SIZE = 48;
 
+/** Edge length of the icon drawn inside the button, leaving a comfortable ring around it. */
+const ICON_SIZE = 26;
+
 /**
  * Round icon button that floats over the camera preview.
  *
- * A translucent black disc with a white glyph and a thin light ring stays
- * legible over any camera frame. The glyph is purely decorative: the button's
- * accessible name comes from `label`, which also lets Maestro and screen
- * readers find it. Positioning is left to the parent so the button stays
- * reusable; {@link CameraFlipButton} and {@link MirrorToggleButton} build on it.
+ * A translucent black disc with a white vector icon and a thin light ring stays
+ * legible over any camera frame. The icon is a vector glyph, not a text
+ * character, so it is drawn the same size and dead-centre on every device and
+ * font. It is purely decorative: the button's accessible name comes from
+ * `label`, which also lets Maestro and screen readers find it. Positioning is
+ * left to the parent so the button stays reusable; {@link CameraFlipButton},
+ * {@link MirrorToggleButton} and {@link TorchButton} build on it.
  */
 export function FloatingIconButton({ icon, label, onPress, testID, selected }: Props) {
   return (
@@ -37,9 +46,13 @@ export function FloatingIconButton({ icon, label, onPress, testID, selected }: P
       accessibilityLabel={label}
       accessibilityState={{ selected }}
     >
-      <Text style={styles.icon} importantForAccessibility="no" accessibilityElementsHidden>
-        {icon}
-      </Text>
+      <Ionicons
+        name={icon}
+        size={ICON_SIZE}
+        color="#fff"
+        importantForAccessibility="no"
+        accessibilityElementsHidden
+      />
     </Pressable>
   );
 }
@@ -57,10 +70,5 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.6,
-  },
-  icon: {
-    color: '#fff',
-    fontSize: 26,
-    lineHeight: 30,
   },
 });

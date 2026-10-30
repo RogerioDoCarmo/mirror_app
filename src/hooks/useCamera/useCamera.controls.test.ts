@@ -172,3 +172,103 @@ describe('useCamera — facing, zoom and mirror', () => {
     expect(result.current.toggleMirrored).toBe(first);
   });
 });
+
+describe('useCamera — flashlight', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseExpoCameraPermission.mockReturnValue({
+      permission: null,
+      requestPermission: jest.fn(),
+    });
+  });
+
+  it('starts with the flashlight off and none to offer on the front camera', () => {
+    const { result } = setup();
+
+    expect(result.current.torchOn).toBe(false);
+    expect(result.current.canUseTorch).toBe(false);
+  });
+
+  it('offers the flashlight on the back camera only', () => {
+    const { result } = setup();
+
+    act(() => {
+      result.current.toggleFacing();
+    });
+    expect(result.current.canUseTorch).toBe(true);
+
+    act(() => {
+      result.current.toggleFacing();
+    });
+    expect(result.current.canUseTorch).toBe(false);
+  });
+
+  it('turns the flashlight on and off', () => {
+    const { result } = setup();
+    act(() => {
+      result.current.toggleFacing();
+    });
+
+    act(() => {
+      result.current.toggleTorch();
+    });
+    expect(result.current.torchOn).toBe(true);
+
+    act(() => {
+      result.current.toggleTorch();
+    });
+    expect(result.current.torchOn).toBe(false);
+  });
+
+  it('turns the flashlight off when the camera is switched, so it is not left lit', () => {
+    const { result } = setup();
+    act(() => {
+      result.current.toggleFacing(); // back
+    });
+    act(() => {
+      result.current.toggleTorch();
+    });
+    expect(result.current.torchOn).toBe(true);
+
+    act(() => {
+      result.current.toggleFacing(); // front
+    });
+    expect(result.current.torchOn).toBe(false);
+
+    act(() => {
+      result.current.toggleFacing(); // back again
+    });
+    expect(result.current.torchOn).toBe(false);
+  });
+
+  it('leaves the zoom and the mirror choice alone when the flashlight is toggled', () => {
+    const { result } = setup();
+    act(() => {
+      result.current.toggleFacing();
+    });
+    act(() => {
+      result.current.toggleMirrored();
+    });
+    pinchOut(result);
+
+    act(() => {
+      result.current.toggleTorch();
+    });
+
+    expect(result.current.zoom).toBeCloseTo(0.3, 10);
+    expect(result.current.showMirrored).toBe(true);
+    expect(result.current.facing).toBe('back');
+  });
+
+  it('keeps toggleTorch referentially stable', () => {
+    const { result, rerender } = setup();
+    const first = result.current.toggleTorch;
+
+    act(() => {
+      result.current.toggleTorch();
+    });
+    rerender({});
+
+    expect(result.current.toggleTorch).toBe(first);
+  });
+});

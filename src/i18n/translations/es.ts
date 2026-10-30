@@ -10,4 +10,7 @@ export const es: TranslationMap = {
   'camera.switchCamera': 'Cambiar de cámara',
   'camera.showMirrorView': 'Mostrar vista de espejo',
   'camera.showAsOthersSeeYou': 'Mostrar como te ven los demás',
+  'camera.turnTorchOn': 'Encender la linterna',
+  'camera.turnTorchOff': 'Apagar la linterna',
+  'camera.zoomHint': 'Pellizca para hacer zoom',
 };

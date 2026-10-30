@@ -28,10 +28,10 @@ describe('MirrorToggleButton', () => {
     expect(screen.getByTestId('custom-mirror')).toBeTruthy();
   });
 
-  it('shows the left-right arrow glyph', () => {
+  it('shows the left-right arrows icon', () => {
     render(<MirrorToggleButton label="Show mirror view" selected={false} onPress={() => {}} />);
 
-    expect(screen.getByText('↔', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getByText('swap-horizontal', { includeHiddenElements: true })).toBeTruthy();
   });
 
   it('calls onPress when tapped', () => {

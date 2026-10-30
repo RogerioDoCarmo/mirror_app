@@ -82,7 +82,9 @@ Miroji is published on [F-Droid](https://f-droid.org/packages/com.rogeriodocarmo
 
 `expo-camera` hard-depends on Google's MLKit and Play Services for barcode scanning — components F-Droid will not build. Miroji applies a [patch](patches/) at F-Droid build time that removes them while preserving the module's public API, so the camera behaves identically with no Google code in the binary. Every Expo and React Native module is then compiled from source rather than consumed as a prebuilt AAR.
 
-The result is a build with **zero anti-features** on its F-Droid listing, requesting exactly one permission — `CAMERA` — and nothing else. No network access, no storage, no analytics. At 20 MB it is roughly a third the size of the equivalent Play Store build, having dropped the emulator-only ABIs and the proprietary components.
+A second, one-line patch ([`expo-camera.patch`](patches/expo-camera.patch)) is applied by pnpm itself, in every build: it makes the Android preview a `TextureView` instead of a `SurfaceView`, because a `SurfaceView` ignores the parent's transform and the "show as others see you" flip would otherwise do nothing.
+
+The result is a build with **zero anti-features** on its F-Droid listing, requesting exactly one permission — `CAMERA` — and nothing else. No network access, no storage permission, no analytics. At 20 MB it is roughly a third the size of the equivalent Play Store build, having dropped the emulator-only ABIs and the proprietary components.
 
 [`docs/FDROID.md`](docs/FDROID.md) documents the full setup: the dual-repository mirror, the source-build configuration, and the packaging decisions behind it.
 
@@ -187,19 +189,24 @@ mapping anchored to real files, and an honest account of the trade-offs.
 src/
 ├── core/                     # ← inward-most: no library imports
 │   ├── domain/               #   pure types (PermissionState, TranslationKey, SupportedLocale)
-│   └── ports/                #   interfaces the app depends on (ICameraPermissionPort, ILocalePort)
+│   └── ports/                #   interfaces the app depends on (ICameraPermissionPort, ILocalePort, IHintStorePort)
 ├── adapters/                 # the ONLY importers of expo-* libraries
 │   ├── expo-camera/          #   ExpoCameraPermissionAdapter implements ICameraPermissionPort
+│   ├── expo-file-system/     #   ExpoFileHintStoreAdapter implements IHintStorePort
 │   └── expo-localization/    #   ExpoLocalizationAdapter implements ILocalePort
 ├── application/
-│   └── providers/            # dependency injection via React Context (CameraProvider, LocaleProvider)
+│   └── providers/            # dependency injection via React Context (CameraProvider, LocaleProvider, HintStoreProvider)
 ├── components/
 │   ├── Button/               # reusable accessible pressable
-│   └── PermissionGate/       # loading / denied / blocked / granted permission states
+│   ├── FloatingIconButton/   # round vector-icon button (CameraFlipButton, MirrorToggleButton, TorchButton)
+│   ├── PermissionGate/       # loading / denied / blocked / granted permission states
+│   └── ZoomHint/             # one-time "pinch to zoom" overlay
 ├── hooks/
-│   └── useCamera/            # facade over the permission lifecycle + camera ref + ready state
+│   ├── useCamera/            # facade over the permission lifecycle + camera ref + facing, mirror and flashlight
+│   ├── usePinchZoom/         # two-finger pinch → zoom level
+│   └── useZoomHint/          # shows the zoom hint once per device
 ├── screens/
-│   └── MirrorScreen/         # front-facing camera rendered in mirror mode
+│   └── MirrorScreen/         # camera preview in mirror mode, with the floating controls
 ├── i18n/translations/        # en · pt · es · ja string maps (completeness type-enforced)
 └── types/                    # shared TypeScript types
 

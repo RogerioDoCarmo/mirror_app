@@ -13,6 +13,10 @@ jest.mock('@/hooks/useCamera', () => ({
   useCamera: jest.fn(),
 }));
 
+jest.mock('@/hooks/useZoomHint', () => ({
+  useZoomHint: jest.fn(),
+}));
+
 jest.mock('@/adapters/expo-localization/ExpoLocalizationAdapter', () => ({
   useExpoLocalization: jest.fn(),
 }));
@@ -28,6 +32,7 @@ jest.mock('expo-camera', () => {
     facing,
     zoom,
     mirror,
+    enableTorch,
     accessible,
     accessibilityLabel,
   }: {
@@ -37,6 +42,7 @@ jest.mock('expo-camera', () => {
     facing?: string;
     zoom?: number;
     mirror?: boolean;
+    enableTorch?: boolean;
   }) =>
     // The 'View' host component is what React Native's View renders, and unlike
     // View itself it accepts the camera-specific props asserted on below.
@@ -45,6 +51,7 @@ jest.mock('expo-camera', () => {
       facing,
       zoom,
       mirror,
+      enableTorch,
       accessible,
       accessibilityLabel,
     });
@@ -52,6 +59,7 @@ jest.mock('expo-camera', () => {
 });
 
 const { useCamera } = require('@/hooks/useCamera') as { useCamera: jest.Mock };
+const { useZoomHint } = require('@/hooks/useZoomHint') as { useZoomHint: jest.Mock };
 const mockUseExpoLocalization = jest.mocked(useExpoLocalization);
 
 const enPort = {
@@ -69,6 +77,7 @@ const mockOnCameraReady = jest.fn();
 const mockRequestPermission = jest.fn();
 const mockToggleFacing = jest.fn();
 const mockToggleMirrored = jest.fn();
+const mockToggleTorch = jest.fn();
 const mockOpenSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
 
 const mockPinchHandlers = {
@@ -91,6 +100,9 @@ const baseHookReturn = {
   showMirrored: true,
   toggleMirrored: mockToggleMirrored,
   nativeMirror: true,
+  torchOn: false,
+  canUseTorch: false,
+  toggleTorch: mockToggleTorch,
   previewFlipped: false,
   zoom: 0,
   pinchHandlers: mockPinchHandlers,
@@ -116,6 +128,7 @@ describe('MirrorScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseExpoLocalization.mockReturnValue(enPort);
+    useZoomHint.mockReturnValue(false);
   });
 
   it('shows a loading indicator while camera permissions are being determined', () => {
@@ -207,6 +220,17 @@ describe('MirrorScreen', () => {
       expect(screen.getByTestId('camera-view')).toHaveProp('facing', 'back');
       expect(screen.getByTestId('camera-view')).toHaveProp('zoom', 0.4);
       expect(screen.getByTestId('camera-view')).toHaveProp('mirror', false);
+    });
+
+    it('lights the flashlight only when asked to', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted, torchOn: true });
+      const { unmount } = render(<MirrorScreen />, { wrapper });
+      expect(screen.getByTestId('camera-view')).toHaveProp('enableTorch', true);
+      unmount();
+
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted, torchOn: false });
+      render(<MirrorScreen />, { wrapper });
+      expect(screen.getByTestId('camera-view')).toHaveProp('enableTorch', false);
     });
 
     it('mirrors the front camera preview', () => {
@@ -398,8 +422,140 @@ describe('MirrorScreen', () => {
     });
   });
 
+  describe('flashlight button', () => {
+    it('is not offered on the front camera', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted, canUseTorch: false });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.queryByTestId('torch-button')).toBeNull();
+    });
+
+    it('is offered on the back camera, named for what pressing does', () => {
+      useCamera.mockReturnValue({
+        ...baseHookReturn,
+        permission: granted,
+        facing: 'back',
+        canUseTorch: true,
+      });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByRole('button', { name: 'Turn flashlight on' })).toHaveProp(
+        'accessibilityState',
+        { selected: false },
+      );
+    });
+
+    it('offers to turn the flashlight off while it is lit', () => {
+      useCamera.mockReturnValue({
+        ...baseHookReturn,
+        permission: granted,
+        facing: 'back',
+        canUseTorch: true,
+        torchOn: true,
+      });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByRole('button', { name: 'Turn flashlight off' })).toHaveProp(
+        'accessibilityState',
+        { selected: true },
+      );
+    });
+
+    it('is translated into the active locale', () => {
+      mockUseExpoLocalization.mockReturnValue(esPort);
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted, canUseTorch: true });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByRole('button', { name: 'Encender la linterna' })).toBeTruthy();
+    });
+
+    it('toggles the flashlight when pressed, and nothing else', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted, canUseTorch: true });
+      render(<MirrorScreen />, { wrapper });
+
+      fireEvent.press(screen.getByTestId('torch-button'));
+
+      expect(mockToggleTorch).toHaveBeenCalledTimes(1);
+      expect(mockToggleFacing).not.toHaveBeenCalled();
+      expect(mockToggleMirrored).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('zoom hint', () => {
+    it('is shown over the preview when the hint is due', () => {
+      useZoomHint.mockReturnValue(true);
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByTestId('zoom-hint')).toBeTruthy();
+      expect(screen.getByText('Pinch to zoom')).toBeTruthy();
+    });
+
+    it('is not shown otherwise', () => {
+      useZoomHint.mockReturnValue(false);
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.queryByTestId('zoom-hint')).toBeNull();
+    });
+
+    it('is translated into the active locale', () => {
+      mockUseExpoLocalization.mockReturnValue(esPort);
+      useZoomHint.mockReturnValue(true);
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByText('Pellizca para hacer zoom')).toBeTruthy();
+    });
+
+    it('is not part of the pinch area, so it cannot get in the way of a pinch', () => {
+      useZoomHint.mockReturnValue(true);
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByTestId('pinch-zoom-area')).not.toContainElement(
+        screen.getByTestId('zoom-hint'),
+      );
+    });
+
+    it('is asked for once the camera permission is granted, with the current zoom', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted, zoom: 0.4 });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(useZoomHint).toHaveBeenLastCalledWith(true, 0.4);
+    });
+
+    it('is not asked for while the permission is still undecided', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: null });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(useZoomHint).toHaveBeenLastCalledWith(false, 0);
+    });
+
+    it('is not asked for after the permission was refused', () => {
+      useCamera.mockReturnValue({
+        ...baseHookReturn,
+        permission: { granted: false, canAskAgain: true },
+      });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(useZoomHint).toHaveBeenLastCalledWith(false, 0);
+    });
+  });
+
   describe('control placement', () => {
-    it('sits bottom-left, 16 points from the edges plus the safe-area insets', () => {
+    it('sits bottom-left, 16 points from the left and 48 from the bottom plus the insets', () => {
       useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
 
       render(<MirrorScreen />, { wrapper });
@@ -408,21 +564,21 @@ describe('MirrorScreen', () => {
       expect(screen.getByTestId('camera-controls')).toHaveStyle({
         position: 'absolute',
         left: 23,
-        bottom: 50,
+        bottom: 82,
       });
     });
 
-    it('keeps the plain 16 point margin when the screen has no insets', () => {
+    it('keeps the plain margins when the screen has no insets', () => {
       useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
 
       render(<MirrorScreen />, {
         wrapper: makeWrapper({ frame, insets: { top: 0, left: 0, right: 0, bottom: 0 } }),
       });
 
-      expect(screen.getByTestId('camera-controls')).toHaveStyle({ left: 16, bottom: 16 });
+      expect(screen.getByTestId('camera-controls')).toHaveStyle({ left: 16, bottom: 48 });
     });
 
-    it('spaces the two buttons 12 points apart, mirror toggle above camera switch', () => {
+    it('spaces the buttons 12 points apart, mirror toggle above camera switch', () => {
       useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
 
       render(<MirrorScreen />, { wrapper });
@@ -430,6 +586,17 @@ describe('MirrorScreen', () => {
       expect(screen.getByTestId('camera-controls')).toHaveStyle({ gap: 12 });
       expect(screen.getAllByRole('button')[0]).toHaveProp('testID', 'mirror-toggle-button');
       expect(screen.getAllByRole('button')[1]).toHaveProp('testID', 'camera-flip-button');
+    });
+
+    it('stacks the flashlight at the top when the back camera offers it', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted, canUseTorch: true });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getAllByRole('button')).toHaveLength(3);
+      expect(screen.getAllByRole('button')[0]).toHaveProp('testID', 'torch-button');
+      expect(screen.getAllByRole('button')[1]).toHaveProp('testID', 'mirror-toggle-button');
+      expect(screen.getAllByRole('button')[2]).toHaveProp('testID', 'camera-flip-button');
     });
   });
 });

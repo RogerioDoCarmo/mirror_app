@@ -14,9 +14,16 @@ type Props = Readonly<{
 /**
  * Round icon button that switches between the front and back camera.
  *
- * A {@link FloatingIconButton} showing a circular-arrow glyph. Positioning is
- * left to the parent.
+ * A {@link FloatingIconButton} showing a camera with a reverse arrow.
+ * Positioning is left to the parent.
  */
 export function CameraFlipButton({ label, onPress, testID = 'camera-flip-button' }: Props) {
-  return <FloatingIconButton icon={'↻'} label={label} onPress={onPress} testID={testID} />;
+  return (
+    <FloatingIconButton
+      icon="camera-reverse-outline"
+      label={label}
+      onPress={onPress}
+      testID={testID}
+    />
+  );
 }

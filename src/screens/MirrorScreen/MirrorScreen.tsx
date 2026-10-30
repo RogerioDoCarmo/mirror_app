@@ -4,20 +4,33 @@ import { CameraView } from 'expo-camera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocale } from '@/application/providers/LocaleProvider';
 import { useCamera } from '@/hooks/useCamera';
+import { useZoomHint } from '@/hooks/useZoomHint';
 import { CameraFlipButton } from '@/components/CameraFlipButton';
 import { MirrorToggleButton } from '@/components/MirrorToggleButton';
 import { PermissionGate } from '@/components/PermissionGate';
+import { TorchButton } from '@/components/TorchButton';
+import { ZoomHint } from '@/components/ZoomHint';
 
-/** Gap kept between the control buttons and the screen edge, on top of any safe-area inset. */
-const CONTROLS_MARGIN = 16;
+/** Gap kept between the control buttons and the left screen edge, on top of any safe-area inset. */
+const CONTROLS_SIDE_MARGIN = 16;
+
+/**
+ * Gap kept between the control buttons and the bottom screen edge, on top of
+ * any safe-area inset. Larger than the side gap so the lowest button sits well
+ * clear of the gesture bar and the rounded corners, where a thumb reaches it
+ * without brushing the system navigation.
+ */
+const CONTROLS_BOTTOM_MARGIN = 48;
 
 /**
  * Root screen of Miroji.
  *
  * Starts on the front-facing camera in mirror mode so the user sees a real-time
- * reflection of themselves. A two-finger pinch zooms the preview, and two
- * floating buttons in the bottom-left corner switch between the front and back
- * camera and between the mirror view and the view other people have of the user.
+ * reflection of themselves. A two-finger pinch zooms the preview, announced to
+ * new users by a brief hint, and floating buttons in the bottom-left corner
+ * switch between the front and back camera, between the mirror view and the
+ * view other people have of the user, and (on the back camera) turn the
+ * flashlight on and off.
  * Camera permission is handled by {@link PermissionGate}: the camera view is
  * only mounted once access has been granted.
  */
@@ -32,12 +45,16 @@ export function MirrorScreen() {
     showMirrored,
     toggleMirrored,
     nativeMirror,
+    torchOn,
+    canUseTorch,
+    toggleTorch,
     previewFlipped,
     zoom,
     pinchHandlers,
   } = useCamera();
   const { t } = useLocale();
   const insets = useSafeAreaInsets();
+  const zoomHintVisible = useZoomHint(permission?.granted === true, zoom);
 
   return (
     <PermissionGate
@@ -90,26 +107,40 @@ export function MirrorScreen() {
             facing={facing}
             zoom={zoom}
             mirror={nativeMirror}
+            enableTorch={torchOn}
             onCameraReady={onCameraReady}
             testID="camera-view"
             accessibilityLabel="camera-view"
             accessible={true}
           />
         </View>
+        {/* One-time overlay for new users; it ignores touches so a pinch passes through. */}
+        {zoomHintVisible && <ZoomHint label={t('camera.zoomHint')} />}
         {/*
          * Rendered after the camera so the controls float above the preview.
          * The inset is added to the margin so they clear the home indicator and
-         * rounded corners on edge-to-edge screens.  Both sit bottom-left, where
-         * a thumb rests when holding the phone, with the mirror toggle above
-         * the camera switch.
+         * rounded corners on edge-to-edge screens.  They sit bottom-left, where
+         * a thumb rests when holding the phone: the camera switch lowest, the
+         * mirror toggle above it and, on the back camera only, the flashlight
+         * at the top.
          */}
         <View
           testID="camera-controls"
           style={[
             styles.controls,
-            { left: CONTROLS_MARGIN + insets.left, bottom: CONTROLS_MARGIN + insets.bottom },
+            {
+              left: CONTROLS_SIDE_MARGIN + insets.left,
+              bottom: CONTROLS_BOTTOM_MARGIN + insets.bottom,
+            },
           ]}
         >
+          {canUseTorch && (
+            <TorchButton
+              label={t(torchOn ? 'camera.turnTorchOff' : 'camera.turnTorchOn')}
+              on={torchOn}
+              onPress={toggleTorch}
+            />
+          )}
           <MirrorToggleButton
             label={t(showMirrored ? 'camera.showAsOthersSeeYou' : 'camera.showMirrorView')}
             selected={!showMirrored}

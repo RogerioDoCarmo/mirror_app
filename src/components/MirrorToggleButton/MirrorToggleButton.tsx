@@ -20,7 +20,7 @@ type Props = Readonly<{
  * Round icon button that flips the preview between the mirrored view and the
  * view other people see.
  *
- * A {@link FloatingIconButton} showing a left-right arrow glyph, exposing
+ * A {@link FloatingIconButton} showing left-right arrows, exposing
  * `selected` to assistive technology. Positioning is left to the parent.
  */
 export function MirrorToggleButton({
@@ -31,7 +31,7 @@ export function MirrorToggleButton({
 }: Props) {
   return (
     <FloatingIconButton
-      icon={'↔'}
+      icon="swap-horizontal"
       label={label}
       selected={selected}
       onPress={onPress}
