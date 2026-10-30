@@ -21,10 +21,12 @@ describe('CameraFlipButton', () => {
     expect(screen.getByTestId('custom-flip')).toBeTruthy();
   });
 
-  it('shows the circular-arrow glyph', () => {
+  it('shows the camera-with-reverse-arrow icon', () => {
     render(<CameraFlipButton label="Switch camera" onPress={() => {}} />);
 
-    expect(screen.getByText('↻', { includeHiddenElements: true })).toBeTruthy();
+    expect(
+      screen.getByText('camera-reverse-outline', { includeHiddenElements: true }),
+    ).toBeTruthy();
   });
 
   it('calls onPress when tapped', () => {

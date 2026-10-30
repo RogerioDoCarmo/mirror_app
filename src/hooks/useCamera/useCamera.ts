@@ -40,6 +40,12 @@ export type UseCameraReturn = {
   toggleMirrored: () => void;
   /** Value for `<CameraView mirror>`: the front camera is rendered mirrored, the back one is not. */
   nativeMirror: boolean;
+  /** `true` while the flashlight is lit, for `<CameraView enableTorch>`. */
+  torchOn: boolean;
+  /** `true` when the current camera has a flashlight to offer: only the back one does. */
+  canUseTorch: boolean;
+  /** Turns the flashlight on or off. */
+  toggleTorch: () => void;
   /**
    * `true` when the preview must be flipped horizontally on top of the camera
    * view's native `mirror` option to honour {@link UseCameraReturn.showMirrored}.
@@ -61,7 +67,8 @@ export type UseCameraReturn = {
  *
  * The camera starts front-facing because Miroji is a mirror. Switching cameras
  * also resets the zoom, since a zoom level chosen for one lens means nothing
- * for the other, and puts the mirror choice back to that camera's natural look.
+ * for the other, puts the mirror choice back to that camera's natural look and
+ * turns the flashlight off, so it is never left lit behind the user's back.
  * The pinch-to-zoom state is delegated to {@link usePinchZoom}.
  */
 export function useCamera(): UseCameraReturn {
@@ -70,6 +77,7 @@ export function useCamera(): UseCameraReturn {
   const [isReady, setIsReady] = useState(false);
   const [facing, setFacing] = useState<CameraFacing>('front');
   const [showMirrored, setShowMirrored] = useState(isNaturallyMirrored('front'));
+  const [torchOn, setTorchOn] = useState(false);
   const { zoom, pinchHandlers, resetZoom } = usePinchZoom();
 
   // Stryker disable ArrayDeclaration -- equivalent mutant: a static string literal dep never changes, so [] and ["value"] behave identically
@@ -81,11 +89,16 @@ export function useCamera(): UseCameraReturn {
     const next: CameraFacing = facing === 'front' ? 'back' : 'front';
     setFacing(next);
     setShowMirrored(isNaturallyMirrored(next));
+    setTorchOn(false);
     resetZoom();
   }, [facing, resetZoom]);
 
   const toggleMirrored = useCallback(() => {
     setShowMirrored((current) => !current);
+  }, []);
+
+  const toggleTorch = useCallback(() => {
+    setTorchOn((current) => !current);
   }, []);
   // Stryker restore ArrayDeclaration
 
@@ -100,6 +113,9 @@ export function useCamera(): UseCameraReturn {
     showMirrored,
     toggleMirrored,
     nativeMirror: isNaturallyMirrored(facing),
+    torchOn,
+    canUseTorch: facing === 'back',
+    toggleTorch,
     previewFlipped: needsExtraFlip(facing, showMirrored),
     zoom,
     pinchHandlers,

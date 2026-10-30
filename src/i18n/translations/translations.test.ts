@@ -21,3 +21,22 @@ describe('camera control translations', () => {
     }
   });
 });
+
+describe('flashlight and zoom hint translations', () => {
+  it.each([
+    ['en', 'Turn flashlight on', 'Turn flashlight off', 'Pinch to zoom'],
+    ['pt', 'Ligar a lanterna', 'Desligar a lanterna', 'Pince para ampliar'],
+    ['es', 'Encender la linterna', 'Apagar la linterna', 'Pellizca para hacer zoom'],
+    ['ja', 'ライトをつける', 'ライトを消す', 'ピンチでズーム'],
+  ] as const)('%s has the flashlight labels and the zoom hint', (locale, on, off, hint) => {
+    expect(translations[locale]['camera.turnTorchOn']).toBe(on);
+    expect(translations[locale]['camera.turnTorchOff']).toBe(off);
+    expect(translations[locale]['camera.zoomHint']).toBe(hint);
+  });
+
+  it('gives the two flashlight states different labels in every locale', () => {
+    for (const map of Object.values(translations)) {
+      expect(map['camera.turnTorchOn']).not.toBe(map['camera.turnTorchOff']);
+    }
+  });
+});

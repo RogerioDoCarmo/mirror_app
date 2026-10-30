@@ -1,19 +1,34 @@
 appId: com.rogeriodocarmo.miroji
 ---
-# Pre-grant camera permission at the OS level so this flow always starts
-# on the camera screen, independent of mirror_permission_flow.
-# clearState is intentionally omitted — see mirror_permission_flow.yaml.
+# Start from a clean install with the camera permission already granted at the
+# OS level, so this flow always begins on the camera screen as a NEW user (the
+# pinch-to-zoom hint is only shown to someone who has never seen it) and does
+# not depend on mirror_permission_flow.  clearState wipes the "hint seen"
+# marker file along with the rest of the app's data.
 - launchApp:
+    clearState: true
     permissions:
       camera: allow
 
 # CI runners are slow; see mirror_camera_flow.yaml for the 120 s rationale.
+#
+# The pinch hint is on screen for only a few seconds, so it is the FIRST thing
+# waited for: it appears the moment the camera screen does.  The match is by
+# testID (`id:`), NOT by text, because the hint's wording is localised and the
+# CI device's locale is not guaranteed to be English.
+- extendedWaitUntil:
+    visible:
+      id: 'zoom-hint'
+    timeout: 120000
+
+- takeScreenshot: zoom-hint-shown
+
 - extendedWaitUntil:
     visible:
       text: 'camera-view'
     timeout: 120000
 
-# The two floating controls are matched by testID (`id:`), NOT by text.  Their
+# The floating controls are matched by testID (`id:`), NOT by text.  Their
 # accessibilityLabel is localised (and the mirror toggle's changes with its
 # state), so a text: match would break whenever the CI device is not in English.
 # The pinch gesture itself cannot be driven by Maestro; its behaviour is covered
@@ -23,6 +38,10 @@ appId: com.rogeriodocarmo.miroji
 
 - assertVisible:
     id: 'mirror-toggle-button'
+
+# The flashlight belongs to the back camera; the app starts on the front one.
+- assertNotVisible:
+    id: 'torch-button'
 
 - takeScreenshot: controls-initial
 
@@ -40,6 +59,25 @@ appId: com.rogeriodocarmo.miroji
 - assertVisible:
     id: 'camera-flip-button'
 
+# The back camera offers the flashlight.  Whether the emulator has a flash unit
+# is beside the point: the button must be there, and pressing it must leave the
+# app running with the preview on screen.
+- assertVisible:
+    id: 'torch-button'
+
+- tapOn:
+    id: 'torch-button'
+
+- assertVisible:
+    text: 'camera-view'
+
+- assertVisible:
+    id: 'torch-button'
+
+# And off again.
+- tapOn:
+    id: 'torch-button'
+
 # Flipping the preview is a pure visual change: the camera stays mounted.
 - tapOn:
     id: 'mirror-toggle-button'
@@ -54,10 +92,29 @@ appId: com.rogeriodocarmo.miroji
 - tapOn:
     id: 'mirror-toggle-button'
 
+# Back to the front camera: the flashlight goes away with the back camera.
 - tapOn:
     id: 'camera-flip-button'
 
 - assertVisible:
     text: 'camera-view'
 
+- assertNotVisible:
+    id: 'torch-button'
+
 - takeScreenshot: controls-final
+
+# A second launch (app data kept) must NOT show the hint again: it was recorded
+# as seen on the first one.  camera-view appears at the very moment the hint
+# would, so once it is visible the hint is certainly absent if it is not there.
+- launchApp:
+    permissions:
+      camera: allow
+
+- extendedWaitUntil:
+    visible:
+      text: 'camera-view'
+    timeout: 120000
+
+- assertNotVisible:
+    id: 'zoom-hint'

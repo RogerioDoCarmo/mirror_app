@@ -9,4 +9,7 @@ export const en: TranslationMap = {
   'camera.switchCamera': 'Switch camera',
   'camera.showMirrorView': 'Show mirror view',
   'camera.showAsOthersSeeYou': 'Show as others see you',
+  'camera.turnTorchOn': 'Turn flashlight on',
+  'camera.turnTorchOff': 'Turn flashlight off',
+  'camera.zoomHint': 'Pinch to zoom',
 };

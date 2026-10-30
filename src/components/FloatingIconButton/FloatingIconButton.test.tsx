@@ -4,7 +4,13 @@ import { FloatingIconButton } from './FloatingIconButton';
 
 const renderButton = (props: Partial<React.ComponentProps<typeof FloatingIconButton>> = {}) =>
   render(
-    <FloatingIconButton icon="*" label="Do it" onPress={() => {}} testID="floating" {...props} />,
+    <FloatingIconButton
+      icon="flashlight"
+      label="Do it"
+      onPress={() => {}}
+      testID="floating"
+      {...props}
+    />,
   );
 
 describe('FloatingIconButton', () => {
@@ -21,20 +27,30 @@ describe('FloatingIconButton', () => {
     expect(screen.getByRole('button', { name: 'Do it' })).toBeTruthy();
   });
 
-  it('draws the icon glyph', () => {
-    renderButton({ icon: '#' });
+  it('draws the icon it is given', () => {
+    renderButton({ icon: 'swap-horizontal' });
 
-    expect(screen.getByText('#', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getByText('swap-horizontal', { includeHiddenElements: true })).toBeTruthy();
   });
 
-  it('hides the decorative glyph from assistive technology', () => {
-    renderButton({ icon: '#' });
+  it('draws a 26 point vector icon, centred inside the disc', () => {
+    renderButton();
 
-    expect(screen.getByText('#', { includeHiddenElements: true })).toHaveProp(
+    expect(screen.getByText('flashlight', { includeHiddenElements: true })).toHaveProp('size', 26);
+    expect(screen.getByTestId('floating')).toHaveStyle({
+      alignItems: 'center',
+      justifyContent: 'center',
+    });
+  });
+
+  it('hides the decorative icon from assistive technology', () => {
+    renderButton();
+
+    expect(screen.getByText('flashlight', { includeHiddenElements: true })).toHaveProp(
       'importantForAccessibility',
       'no',
     );
-    expect(screen.getByText('#', { includeHiddenElements: true })).toHaveProp(
+    expect(screen.getByText('flashlight', { includeHiddenElements: true })).toHaveProp(
       'accessibilityElementsHidden',
       true,
     );
@@ -59,11 +75,18 @@ describe('FloatingIconButton', () => {
     });
   });
 
-  it('uses a dark translucent disc and a white glyph for contrast over the preview', () => {
-    renderButton({ icon: '#' });
+  it('uses a dark translucent disc and a white icon for contrast over the preview', () => {
+    renderButton();
 
-    expect(screen.getByTestId('floating')).toHaveStyle({ backgroundColor: 'rgba(0, 0, 0, 0.6)' });
-    expect(screen.getByText('#', { includeHiddenElements: true })).toHaveStyle({ color: '#fff' });
+    expect(screen.getByTestId('floating')).toHaveStyle({
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.7)',
+    });
+    expect(screen.getByText('flashlight', { includeHiddenElements: true })).toHaveProp(
+      'color',
+      '#fff',
+    );
   });
 
   it('declares no selected state unless asked to', () => {
