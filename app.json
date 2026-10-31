@@ -12,7 +12,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.rogeriodocarmo.miroji",
       "infoPlist": {
-        "NSCameraUsageDescription": "Miroji uses your front camera to show you a mirror view.",
+        "NSCameraUsageDescription": "Miroji uses your camera to show you a mirror view.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "appleTeamId": "MJ8B2UX599"
@@ -36,7 +36,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Miroji uses your front camera to display a mirror view.",
+          "cameraPermission": "Miroji uses your camera to display a mirror view.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
