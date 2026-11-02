@@ -116,5 +116,14 @@
     "patchedDependencies": {
       "expo-camera": "patches/expo-camera.patch"
     }
+  },
+  "expo": {
+    "autolinking": {
+      "android": {
+        "buildFromSource": [
+          "expo-camera"
+        ]
+      }
+    }
   }
 }
