@@ -25,3 +25,19 @@ onto a consistent gradient + device-frame template.
 | `screenshots/ios/ipad/`            | App Store — iPad 12.9″        | 2064×2752  |
 
 First submitted with **v1.3.1 (build 20)**.
+
+## Rebuilding the sets
+
+`tools/compose.py` builds every slide from the real captures in `raw/` (see
+`raw/README.md` for what to capture) with the shared gradient, caption and
+device-frame template:
+
+```bash
+pip install pillow
+python store-assets/tools/compose.py                    # all sets
+python store-assets/tools/compose.py --set ios/phone    # one set
+```
+
+Slides whose capture is missing are skipped and listed, so a set can be built as
+captures arrive. The text slides (hero, privacy, languages) need no capture. The
+slide wording lives in `SLIDES` at the top of the script.
