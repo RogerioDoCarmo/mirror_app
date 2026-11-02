@@ -12,4 +12,5 @@ export const pt: TranslationMap = {
   'camera.turnTorchOn': 'Ligar a lanterna',
   'camera.turnTorchOff': 'Desligar a lanterna',
   'camera.zoomHint': 'Pince para ampliar',
+  'camera.flipHint': 'Toque para se ver como os outros veem',
 };

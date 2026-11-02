@@ -11,7 +11,9 @@ const mockUseExpoFileHintStore = jest.mocked(useExpoFileHintStore);
 
 const mockPort = {
   zoomHintSeen: true,
+  flipHintSeen: true,
   markZoomHintSeen: jest.fn(),
+  markFlipHintSeen: jest.fn(),
 };
 
 describe('HintStoreProvider', () => {

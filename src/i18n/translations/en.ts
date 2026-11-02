@@ -12,4 +12,5 @@ export const en: TranslationMap = {
   'camera.turnTorchOn': 'Turn flashlight on',
   'camera.turnTorchOff': 'Turn flashlight off',
   'camera.zoomHint': 'Pinch to zoom',
+  'camera.flipHint': 'Tap to see yourself as others do',
 };

@@ -4,12 +4,13 @@ import { CameraView } from 'expo-camera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocale } from '@/application/providers/LocaleProvider';
 import { useCamera } from '@/hooks/useCamera';
+import { useFlipHint } from '@/hooks/useFlipHint';
 import { useZoomHint } from '@/hooks/useZoomHint';
 import { CameraFlipButton } from '@/components/CameraFlipButton';
+import { Hint } from '@/components/Hint';
 import { MirrorToggleButton } from '@/components/MirrorToggleButton';
 import { PermissionGate } from '@/components/PermissionGate';
 import { TorchButton } from '@/components/TorchButton';
-import { ZoomHint } from '@/components/ZoomHint';
 
 /** Gap kept between the control buttons and the left screen edge, on top of any safe-area inset. */
 const CONTROLS_SIDE_MARGIN = 16;
@@ -26,8 +27,10 @@ const CONTROLS_BOTTOM_MARGIN = 48;
  * Root screen of Miroji.
  *
  * Starts on the front-facing camera in mirror mode so the user sees a real-time
- * reflection of themselves. A two-finger pinch zooms the preview, announced to
- * new users by a brief hint, and floating buttons in the bottom-left corner
+ * reflection of themselves. A two-finger pinch zooms the preview, and the
+ * button that shows the view other people have of them is easy to miss; each is
+ * announced to new users by a brief one-time hint, the zoom hint first and the
+ * flip hint right after it. Floating buttons in the bottom-left corner
  * switch between the front and back camera, between the mirror view and the
  * view other people have of the user, and (on the back camera) turn the
  * flashlight on and off.
@@ -54,7 +57,13 @@ export function MirrorScreen() {
   } = useCamera();
   const { t } = useLocale();
   const insets = useSafeAreaInsets();
-  const zoomHintVisible = useZoomHint(permission?.granted === true, zoom);
+  const cameraShown = permission?.granted === true;
+  const zoomHintVisible = useZoomHint(cameraShown, zoom);
+  // Waits for the zoom hint to finish, so the two never share the screen.
+  const { visible: flipHintVisible, dismiss: dismissFlipHint } = useFlipHint(
+    cameraShown,
+    zoomHintVisible,
+  );
 
   return (
     <PermissionGate
@@ -114,8 +123,13 @@ export function MirrorScreen() {
             accessible={true}
           />
         </View>
-        {/* One-time overlay for new users; it ignores touches so a pinch passes through. */}
-        {zoomHintVisible && <ZoomHint label={t('camera.zoomHint')} />}
+        {/* One-time overlays for new users; they ignore touches so a pinch passes through. */}
+        {zoomHintVisible && (
+          <Hint testID="zoom-hint" icon="expand-outline" label={t('camera.zoomHint')} />
+        )}
+        {flipHintVisible && (
+          <Hint testID="flip-hint" icon="swap-horizontal" label={t('camera.flipHint')} />
+        )}
         {/*
          * Rendered after the camera so the controls float above the preview.
          * The inset is added to the margin so they clear the home indicator and
@@ -144,7 +158,10 @@ export function MirrorScreen() {
           <MirrorToggleButton
             label={t(showMirrored ? 'camera.showAsOthersSeeYou' : 'camera.showMirrorView')}
             selected={!showMirrored}
-            onPress={toggleMirrored}
+            onPress={() => {
+              dismissFlipHint();
+              toggleMirrored();
+            }}
           />
           <CameraFlipButton label={t('camera.switchCamera')} onPress={toggleFacing} />
         </View>

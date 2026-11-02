@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Miroji · Last updated: 30 October 2026
+Miroji · Last updated: 2 November 2026
 
 > **Short version:** Miroji is a simple mirror. It shows your device's camera feed on screen in real time. It does **not** collect, store, record, or transmit any personal data, photos, or video. Everything happens on your device.
 
@@ -23,9 +23,9 @@ Miroji requires camera permission for a single purpose: to display your camera f
 
 The app reads your device's language setting locally to display its interface in a supported language (English, Portuguese, Spanish, or Japanese). This preference is read on-device only and is never collected or transmitted.
 
-## 5. A one-time tip
+## 5. One-time tips
 
-The first time you open Miroji it briefly shows a tip explaining that you can pinch to zoom. To avoid showing it again, the app saves one empty file, named `zoom-hint-seen`, in its own private storage on your device. The file contains nothing, is not personal data, is never read by anyone but the app, and never leaves your device. It is removed when you uninstall Miroji or clear its data.
+The first time you open Miroji it briefly shows two tips, one after the other: that you can pinch to zoom, and that you can tap the flip button to see yourself the way other people see you. To avoid showing each tip again, the app saves one empty file per tip, named `zoom-hint-seen` and `flip-hint-seen`, in its own private storage on your device. The files contain nothing, are not personal data, are never read by anyone but the app, and never leave your device. They are removed when you uninstall Miroji or clear its data. If you already used an earlier version, you will see the second tip once after updating.
 
 ## 6. Data sharing and selling
 

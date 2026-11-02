@@ -22,6 +22,17 @@ describe('camera control translations', () => {
   });
 });
 
+describe('flip hint translations', () => {
+  it.each([
+    ['en', 'Tap to see yourself as others do'],
+    ['pt', 'Toque para se ver como os outros veem'],
+    ['es', 'Toca para verte como te ven los demás'],
+    ['ja', 'タップして他の人から見た自分を表示'],
+  ] as const)('%s has the flip hint', (locale, hint) => {
+    expect(translations[locale]['camera.flipHint']).toBe(hint);
+  });
+});
+
 describe('flashlight and zoom hint translations', () => {
   it.each([
     ['en', 'Turn flashlight on', 'Turn flashlight off', 'Pinch to zoom'],
