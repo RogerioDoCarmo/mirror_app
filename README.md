@@ -200,9 +200,10 @@ src/
 │   ├── Button/               # reusable accessible pressable
 │   ├── FloatingIconButton/   # round vector-icon button (CameraFlipButton, MirrorToggleButton, TorchButton)
 │   ├── PermissionGate/       # loading / denied / blocked / granted permission states
-│   └── ZoomHint/             # one-time "pinch to zoom" overlay
+│   └── Hint/                 # one-time tip overlay ("pinch to zoom", "tap to see yourself as others do")
 ├── hooks/
 │   ├── useCamera/            # facade over the permission lifecycle + camera ref + facing, mirror and flashlight
+│   ├── useFlipHint/          # shows the flip hint once per device, after the zoom hint
 │   ├── usePinchZoom/         # two-finger pinch → zoom level
 │   └── useZoomHint/          # shows the zoom hint once per device
 ├── screens/

@@ -11,7 +11,7 @@ import { LocaleProvider } from '@/application/providers/LocaleProvider';
  *
  * Wraps the app tree with {@link SafeAreaProvider} (insets for the floating
  * control buttons), {@link LocaleProvider} (OS language detection and
- * translations), {@link HintStoreProvider} (remembers that the zoom hint was
+ * translations), {@link HintStoreProvider} (remembers which one-time hints were
  * shown) and {@link CameraProvider} (camera permission adapter), then renders
  * {@link MirrorScreen} with a light status bar.
  */

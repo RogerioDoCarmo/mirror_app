@@ -13,4 +13,5 @@ export const es: TranslationMap = {
   'camera.turnTorchOn': 'Encender la linterna',
   'camera.turnTorchOff': 'Apagar la linterna',
   'camera.zoomHint': 'Pellizca para hacer zoom',
+  'camera.flipHint': 'Toca para verte como te ven los demás',
 };

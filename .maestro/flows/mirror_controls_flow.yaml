@@ -2,15 +2,15 @@ appId: com.rogeriodocarmo.miroji
 ---
 # Start from a clean install, so this flow always begins as a NEW user (the
 # pinch-to-zoom hint is only shown to someone who has never seen it) and does
-# not depend on the other flows.  clearState wipes the "hint seen" marker file
-# along with the rest of the app's data.
+# not depend on the other flows.  clearState wipes the "hint seen" marker files
+# (zoom-hint-seen and flip-hint-seen) along with the rest of the app's data.
 #
 # The camera permission is granted by a SECOND launch, not this one: on the iOS
 # simulator clearState resets the permission, so combining `clearState` with
 # `permissions: camera: allow` in one launchApp leaves the app on the permission
 # screen (the first CI run of this flow ended exactly there).  See
 # mirror_permission_flow.yaml, which uses the same two-step launch.  The first
-# launch leaves the marker absent: the hint is only recorded once it is shown.
+# launch leaves the markers absent: a hint is only recorded once it is shown.
 - launchApp:
     clearState: true
     permissions:
@@ -32,6 +32,34 @@ appId: com.rogeriodocarmo.miroji
     timeout: 120000
 
 - takeScreenshot: zoom-hint-shown
+
+# The flip hint ("tap to see yourself as others do") waits for the zoom hint to
+# go away, so it turns up about five seconds later and is also on screen for
+# only a few.  It is matched by testID for the same reason as the zoom hint.
+# That the two never share the screen is covered by the MirrorScreen integration
+# test; asserting it here would race the zoom hint's own five-second timer.
+- extendedWaitUntil:
+    visible:
+      id: 'flip-hint'
+    timeout: 60000
+
+- takeScreenshot: flip-hint-shown
+
+# The hint ignores touches, so pressing the button underneath its pill reaches
+# the button: the preview flips and the hint goes away, because the user has
+# found what it was pointing at.
+- tapOn:
+    id: 'mirror-toggle-button'
+
+- assertNotVisible:
+    id: 'flip-hint'
+
+- assertVisible:
+    text: 'camera-view'
+
+# Back to the mirror view, so the rest of the flow starts from the default.
+- tapOn:
+    id: 'mirror-toggle-button'
 
 - extendedWaitUntil:
     visible:
@@ -114,9 +142,10 @@ appId: com.rogeriodocarmo.miroji
 
 - takeScreenshot: controls-final
 
-# A second launch (app data kept) must NOT show the hint again: it was recorded
-# as seen on the first one.  camera-view appears at the very moment the hint
-# would, so once it is visible the hint is certainly absent if it is not there.
+# A second launch (app data kept) must NOT show either hint again: both were
+# recorded as seen on the first one.  camera-view appears at the very moment a
+# hint would (neither has to wait for the other now), so once it is visible a
+# hint is certainly absent if it is not there.
 - launchApp:
     permissions:
       camera: allow
@@ -128,3 +157,6 @@ appId: com.rogeriodocarmo.miroji
 
 - assertNotVisible:
     id: 'zoom-hint'
+
+- assertNotVisible:
+    id: 'flip-hint'

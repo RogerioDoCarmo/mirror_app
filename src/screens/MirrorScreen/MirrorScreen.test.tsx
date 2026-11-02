@@ -1,7 +1,7 @@
 import React from 'react';
 import { Linking } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, within } from '@testing-library/react-native';
 import { useExpoLocalization } from '@/adapters/expo-localization/ExpoLocalizationAdapter';
 import { LocaleProvider } from '@/application/providers/LocaleProvider';
 import type { TranslationKey } from '@/core/domain/translations';
@@ -15,6 +15,10 @@ jest.mock('@/hooks/useCamera', () => ({
 
 jest.mock('@/hooks/useZoomHint', () => ({
   useZoomHint: jest.fn(),
+}));
+
+jest.mock('@/hooks/useFlipHint', () => ({
+  useFlipHint: jest.fn(),
 }));
 
 jest.mock('@/adapters/expo-localization/ExpoLocalizationAdapter', () => ({
@@ -60,6 +64,8 @@ jest.mock('expo-camera', () => {
 
 const { useCamera } = require('@/hooks/useCamera') as { useCamera: jest.Mock };
 const { useZoomHint } = require('@/hooks/useZoomHint') as { useZoomHint: jest.Mock };
+const { useFlipHint } = require('@/hooks/useFlipHint') as { useFlipHint: jest.Mock };
+const mockDismissFlipHint = jest.fn();
 const mockUseExpoLocalization = jest.mocked(useExpoLocalization);
 
 const enPort = {
@@ -129,6 +135,7 @@ describe('MirrorScreen', () => {
     jest.clearAllMocks();
     mockUseExpoLocalization.mockReturnValue(enPort);
     useZoomHint.mockReturnValue(false);
+    useFlipHint.mockReturnValue({ visible: false, dismiss: mockDismissFlipHint });
   });
 
   it('shows a loading indicator while camera permissions are being determined', () => {
@@ -551,6 +558,110 @@ describe('MirrorScreen', () => {
       render(<MirrorScreen />, { wrapper });
 
       expect(useZoomHint).toHaveBeenLastCalledWith(false, 0);
+    });
+  });
+
+  describe('flip hint', () => {
+    it('is shown over the preview when the hint is due', () => {
+      useFlipHint.mockReturnValue({ visible: true, dismiss: mockDismissFlipHint });
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByTestId('flip-hint')).toBeTruthy();
+      expect(screen.getByText('Tap to see yourself as others do')).toBeTruthy();
+      // The same glyph as the button it points to, so people can tell which one it means.
+      expect(
+        within(screen.getByTestId('flip-hint')).getByText('swap-horizontal', {
+          includeHiddenElements: true,
+        }),
+      ).toBeTruthy();
+    });
+
+    it('is not shown otherwise', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.queryByTestId('flip-hint')).toBeNull();
+    });
+
+    it('is translated into the active locale', () => {
+      mockUseExpoLocalization.mockReturnValue(esPort);
+      useFlipHint.mockReturnValue({ visible: true, dismiss: mockDismissFlipHint });
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByText('Toca para verte como te ven los demás')).toBeTruthy();
+    });
+
+    it('is not part of the pinch area, so it cannot get in the way of a pinch', () => {
+      useFlipHint.mockReturnValue({ visible: true, dismiss: mockDismissFlipHint });
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByTestId('pinch-zoom-area')).not.toContainElement(
+        screen.getByTestId('flip-hint'),
+      );
+    });
+
+    it('is asked for once the camera permission is granted, and told whether the zoom hint is up', () => {
+      useZoomHint.mockReturnValue(true);
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(useFlipHint).toHaveBeenLastCalledWith(true, true);
+    });
+
+    it('is not blocked when the zoom hint is not on screen', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(useFlipHint).toHaveBeenLastCalledWith(true, false);
+    });
+
+    it('is not asked for while the permission is still undecided', () => {
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: null });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(useFlipHint).toHaveBeenLastCalledWith(false, false);
+    });
+
+    it('is not asked for after the permission was refused', () => {
+      useCamera.mockReturnValue({
+        ...baseHookReturn,
+        permission: { granted: false, canAskAgain: true },
+      });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(useFlipHint).toHaveBeenLastCalledWith(false, false);
+    });
+
+    it('is dismissed, and the view flipped, when the mirror toggle is pressed', () => {
+      useFlipHint.mockReturnValue({ visible: true, dismiss: mockDismissFlipHint });
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+      render(<MirrorScreen />, { wrapper });
+
+      fireEvent.press(screen.getByTestId('mirror-toggle-button'));
+
+      expect(mockDismissFlipHint).toHaveBeenCalledTimes(1);
+      expect(mockToggleMirrored).toHaveBeenCalledTimes(1);
+    });
+
+    it('is left alone by the other buttons', () => {
+      useFlipHint.mockReturnValue({ visible: true, dismiss: mockDismissFlipHint });
+      useCamera.mockReturnValue({ ...baseHookReturn, permission: granted });
+      render(<MirrorScreen />, { wrapper });
+
+      fireEvent.press(screen.getByTestId('camera-flip-button'));
+
+      expect(mockDismissFlipHint).not.toHaveBeenCalled();
     });
   });
 

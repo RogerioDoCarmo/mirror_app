@@ -9,7 +9,12 @@ jest.mock('@/application/providers/HintStoreProvider', () => ({
 const mockUseHintStore = jest.mocked(useHintStore);
 const mockMarkSeen = jest.fn();
 
-const store = (zoomHintSeen: boolean) => ({ zoomHintSeen, markZoomHintSeen: mockMarkSeen });
+const store = (zoomHintSeen: boolean) => ({
+  zoomHintSeen,
+  markZoomHintSeen: mockMarkSeen,
+  flipHintSeen: true,
+  markFlipHintSeen: jest.fn(),
+});
 
 type Props = { ready: boolean; zoom: number };
 

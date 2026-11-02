@@ -2,33 +2,41 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-/** Props accepted by the {@link ZoomHint} component. */
+/** Name of an Ionicons glyph. */
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+/** Props accepted by the {@link Hint} component. */
 type Props = Readonly<{
-  /** Localised sentence explaining the gesture, for example "Pinch to zoom". */
+  /** Localised sentence explaining the feature, for example "Pinch to zoom". */
   label: string;
+  /** Ionicons glyph drawn next to the label; use the one the feature itself shows. */
+  icon: IconName;
+  /** Test identifier of the overlay. The pill inside it gets `${testID}-pill`. */
+  testID: string;
 }>;
 
 /**
- * Brief overlay that tells new users the preview can be zoomed with a pinch.
+ * Brief overlay that tells new users about a feature they might not find alone.
  *
- * A translucent pill with an expand icon and the label, centred over the
- * preview. It never takes touches (`pointerEvents="none"`), so a pinch started
- * on top of it reaches the camera underneath. It is a polite live region so
- * screen readers announce it when it appears, without interrupting.
+ * A translucent pill with an icon and the label, centred over the preview. It
+ * never takes touches (`pointerEvents="none"`), so a gesture started on top of
+ * it reaches the camera underneath. It is a polite live region so screen
+ * readers announce it when it appears, without interrupting. Used for the
+ * pinch-to-zoom tip and the flip tip.
  */
-export function ZoomHint({ label }: Props) {
+export function Hint({ label, icon, testID }: Props) {
   return (
     <View
-      testID="zoom-hint"
+      testID={testID}
       style={styles.overlay}
       // Keeps this layout-only View in the native hierarchy so E2E drivers can find its testID.
       collapsable={false}
       pointerEvents="none"
       accessibilityLiveRegion="polite"
     >
-      <View testID="zoom-hint-pill" style={styles.pill}>
+      <View testID={`${testID}-pill`} style={styles.pill}>
         <Ionicons
-          name="expand-outline"
+          name={icon}
           size={24}
           color="#fff"
           importantForAccessibility="no"

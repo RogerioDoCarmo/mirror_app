@@ -5,6 +5,7 @@
  * translation file, guaranteeing no string is left untranslated.
  */
 export type TranslationKey =
+  | 'camera.flipHint'
   | 'camera.showAsOthersSeeYou'
   | 'camera.showMirrorView'
   | 'camera.switchCamera'

@@ -12,4 +12,5 @@ export const ja: TranslationMap = {
   'camera.turnTorchOn': 'ライトをつける',
   'camera.turnTorchOff': 'ライトを消す',
   'camera.zoomHint': 'ピンチでズーム',
+  'camera.flipHint': 'タップして他の人から見た自分を表示',
 };

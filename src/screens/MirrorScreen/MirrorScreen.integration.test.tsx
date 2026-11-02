@@ -66,6 +66,15 @@ const mockUseExpoCameraPermission = jest.mocked(useExpoCameraPermission);
 const mockUseExpoLocalization = jest.mocked(useExpoLocalization);
 const mockUseExpoFileHintStore = jest.mocked(useExpoFileHintStore);
 const mockMarkZoomHintSeen = jest.fn();
+const mockMarkFlipHintSeen = jest.fn();
+
+/** What the hint store reports for someone who has / has not seen each hint. */
+const hintStore = (zoomHintSeen: boolean, flipHintSeen: boolean) => ({
+  zoomHintSeen,
+  markZoomHintSeen: mockMarkZoomHintSeen,
+  flipHintSeen,
+  markFlipHintSeen: mockMarkFlipHintSeen,
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <SafeAreaProvider
@@ -121,10 +130,7 @@ describe('MirrorScreen — controls end to end', () => {
       requestPermission: jest.fn(),
     });
     // A returning user by default; the hint tests below make it a new one.
-    mockUseExpoFileHintStore.mockReturnValue({
-      zoomHintSeen: true,
-      markZoomHintSeen: mockMarkZoomHintSeen,
-    });
+    mockUseExpoFileHintStore.mockReturnValue(hintStore(true, true));
   });
 
   it('starts as a mirror: front camera, mirrored, unzoomed, not flipped', () => {
@@ -215,11 +221,8 @@ describe('MirrorScreen — controls end to end', () => {
   });
 
   describe('zoom hint', () => {
-    const asNewUser = () =>
-      mockUseExpoFileHintStore.mockReturnValue({
-        zoomHintSeen: false,
-        markZoomHintSeen: mockMarkZoomHintSeen,
-      });
+    // Has seen the flip hint, so only the zoom hint is in play.
+    const asNewUser = () => mockUseExpoFileHintStore.mockReturnValue(hintStore(false, true));
 
     afterEach(() => {
       jest.useRealTimers();
@@ -275,6 +278,101 @@ describe('MirrorScreen — controls end to end', () => {
       });
 
       expect(screen.queryByTestId('zoom-hint')).toBeNull();
+    });
+  });
+
+  describe('flip hint', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('is shown to someone who has seen the zoom hint before, and recorded as seen', () => {
+      mockUseExpoFileHintStore.mockReturnValue(hintStore(true, false));
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.getByText('Tap to see yourself as others do')).toBeTruthy();
+      expect(mockMarkFlipHintSeen).toHaveBeenCalledTimes(1);
+      expect(mockMarkZoomHintSeen).not.toHaveBeenCalled();
+    });
+
+    it('is not shown to someone who has seen it', () => {
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.queryByTestId('flip-hint')).toBeNull();
+      expect(mockMarkFlipHintSeen).not.toHaveBeenCalled();
+    });
+
+    it('is not shown while the camera permission is still being asked for', () => {
+      mockUseExpoFileHintStore.mockReturnValue(hintStore(true, false));
+      mockUseExpoCameraPermission.mockReturnValue({
+        permission: { granted: false, canAskAgain: true },
+        requestPermission: jest.fn(),
+      });
+
+      render(<MirrorScreen />, { wrapper });
+
+      expect(screen.queryByTestId('flip-hint')).toBeNull();
+      expect(mockMarkFlipHintSeen).not.toHaveBeenCalled();
+    });
+
+    it('waits for the zoom hint to go away, so a new user never sees both at once', () => {
+      jest.useFakeTimers();
+      mockUseExpoFileHintStore.mockReturnValue(hintStore(false, false));
+      render(<MirrorScreen />, { wrapper });
+      expect(screen.getByTestId('zoom-hint')).toBeTruthy();
+      expect(screen.queryByTestId('flip-hint')).toBeNull();
+      expect(mockMarkFlipHintSeen).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(screen.queryByTestId('zoom-hint')).toBeNull();
+      expect(screen.getByTestId('flip-hint')).toBeTruthy();
+      expect(mockMarkFlipHintSeen).toHaveBeenCalledTimes(1);
+    });
+
+    it('follows the zoom hint at once when the user pinches', () => {
+      mockUseExpoFileHintStore.mockReturnValue(hintStore(false, false));
+      render(<MirrorScreen />, { wrapper });
+
+      pinch(100, 160);
+
+      expect(screen.queryByTestId('zoom-hint')).toBeNull();
+      expect(screen.getByTestId('flip-hint')).toBeTruthy();
+    });
+
+    it('disappears by itself after a few seconds', () => {
+      jest.useFakeTimers();
+      mockUseExpoFileHintStore.mockReturnValue(hintStore(true, false));
+      render(<MirrorScreen />, { wrapper });
+      expect(screen.getByTestId('flip-hint')).toBeTruthy();
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(screen.queryByTestId('flip-hint')).toBeNull();
+    });
+
+    it('disappears when the user presses the mirror toggle, which still flips the view', () => {
+      mockUseExpoFileHintStore.mockReturnValue(hintStore(true, false));
+      render(<MirrorScreen />, { wrapper });
+
+      fireEvent.press(screen.getByTestId('mirror-toggle-button'));
+
+      expect(screen.queryByTestId('flip-hint')).toBeNull();
+      expect(screen.getByTestId('pinch-zoom-area')).toHaveStyle(FLIPPED);
+    });
+
+    it('stays up when the user switches camera instead', () => {
+      mockUseExpoFileHintStore.mockReturnValue(hintStore(true, false));
+      render(<MirrorScreen />, { wrapper });
+
+      fireEvent.press(screen.getByTestId('camera-flip-button'));
+
+      expect(screen.getByTestId('flip-hint')).toBeTruthy();
     });
   });
 });
