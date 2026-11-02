@@ -1,0 +1,15 @@
+diff --git a/android/src/main/java/expo/modules/camera/ExpoCameraView.kt b/android/src/main/java/expo/modules/camera/ExpoCameraView.kt
+index fc5652694962a66be4b211a2b7670298d52e2c4b..87b917eed87cbf3b7f10244c9e1fc6b9ae519a66 100644
+--- a/android/src/main/java/expo/modules/camera/ExpoCameraView.kt
++++ b/android/src/main/java/expo/modules/camera/ExpoCameraView.kt
+@@ -132,6 +132,10 @@ class ExpoCameraView(
+ 
+   private var previewView = PreviewView(context).apply {
+     elevation = 0f
++    // Miroji: render the preview into a TextureView instead of the default SurfaceView.
++    // A SurfaceView ignores the parent's transform, so flipping the preview with
++    // scaleX = -1 (the "show as others see you" toggle) would do nothing.
++    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+   }
+   private val scope = CoroutineScope(Dispatchers.Main)
+   private var shouldCreateCamera = false

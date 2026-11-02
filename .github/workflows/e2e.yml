@@ -106,7 +106,9 @@ jobs:
           # "xcrun simctl privacy reset", which is unreliable on iOS
           # simulator after a prior grant and leaves the app seeing the
           # camera view instead of the permission screen.  Running the
-          # permission flow first avoids that reset entirely.
+          # permission flow first avoids that reset entirely.  The controls
+          # flow runs last: it clears the app's state itself, so it does not
+          # depend on what the earlier flows left behind.
           #
           # Bounded retry: the expo-camera module intermittently crashes the app
           # on the headless iOS simulator (no real camera hardware), failing
@@ -119,7 +121,8 @@ jobs:
             echo "── Maestro attempt $i/$attempts ──"
             "$HOME/.maestro/bin/maestro" test \
               .maestro/flows/mirror_permission_flow.yaml \
-              .maestro/flows/mirror_camera_flow.yaml && exit 0
+              .maestro/flows/mirror_camera_flow.yaml \
+              .maestro/flows/mirror_controls_flow.yaml && exit 0
             code=$?
             echo "Attempt $i failed (exit $code)."
           done
@@ -259,7 +262,7 @@ jobs:
             # action does not preserve bash "\" line-continuations inside its
             # script block, so a multi-line command leaks a literal "\" as an
             # argument ("Flow path does not exist: .../\").
-            MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 maestro test .maestro/flows/mirror_permission_flow.yaml .maestro/flows/mirror_camera_flow.yaml
+            MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 maestro test .maestro/flows/mirror_permission_flow.yaml .maestro/flows/mirror_camera_flow.yaml .maestro/flows/mirror_controls_flow.yaml
             EXIT_CODE=$?
             kill $LOGCAT_PID 2>/dev/null || true
             exit $EXIT_CODE

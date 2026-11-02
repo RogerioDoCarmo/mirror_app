@@ -166,6 +166,23 @@ describe('every automatically triggered eas build stays on the runner', () => {
   });
 });
 
+describe('the production AAB workflow is free and starts only on request', () => {
+  const PRODUCTION_AAB = workflow('production-aab.yml');
+
+  it('subscribes to nothing but a manual dispatch', () => {
+    expect(triggers(PRODUCTION_AAB)).toStrictEqual(['workflow_dispatch']);
+  });
+
+  // Same bundle as eas-build.yml, minus the credit: the compute is the runner's.
+  it('builds the production profile on the runner, not on EAS', () => {
+    const builds = PRODUCTION_AAB.split('\n').filter((line) => line.includes('eas build'));
+
+    expect(builds).toHaveLength(1);
+    expect(builds[0]).toContain('--profile production');
+    expect(builds[0]).toContain('--local');
+  });
+});
+
 describe('Chromatic is not billed twice for the same tree', () => {
   /**
    * ⚠️ EVERY COMMIT ON DEVELOP ARRIVED THROUGH A PULL REQUEST that had already

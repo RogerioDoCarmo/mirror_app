@@ -25,13 +25,14 @@ nothing about React, Expo, or any library; the libraries are pushed to the very 
                                  ▼
         ┌──────────────────────────────────────────────┐
         │                 application/                   │
-        │     CameraProvider · LocaleProvider  (DI)      │
+        │  Camera · Locale · HintStore  Providers (DI)   │
         └───────────────────────┬────────────────────────┘
                                  │ provides an
                                  ▼
         ┌──────────────────────────────────────────────┐
         │                  core/ports                    │ ◄─ the contract
-        │      ICameraPermissionPort · ILocalePort       │
+        │  ICameraPermissionPort · ILocalePort           │
+        │  IHintStorePort                                │
         └───────────────────────┬────────────────────────┘
                   implemented by │   ▲ depends only on the interface
                                  ▼   │
@@ -39,12 +40,14 @@ nothing about React, Expo, or any library; the libraries are pushed to the very 
         │                   adapters/                    │
         │   ExpoCameraPermissionAdapter                  │
         │   ExpoLocalizationAdapter                      │
+        │   ExpoFileHintStoreAdapter                     │
         │   (the ONLY importers of expo-* libraries)     │
         └───────────────────────┬────────────────────────┘
                                  │ wraps
                                  ▼
         ┌──────────────────────────────────────────────┐
-        │     third-party: expo-camera, expo-localization │
+        │  third-party: expo-camera, expo-localization,  │
+        │  expo-file-system                              │
         └──────────────────────────────────────────────┘
 
    core/domain — pure types (PermissionState, TranslationKey, SupportedLocale).
@@ -58,13 +61,13 @@ knows about. Replacing it means writing one new adapter — nothing else changes
 
 ## 2. Layer responsibilities
 
-| Layer           | Directory                           | Knows about         | Example                                |
-| --------------- | ----------------------------------- | ------------------- | -------------------------------------- |
-| **Domain**      | `src/core/domain/`                  | nothing (pure TS)   | `PermissionState`, `TranslationKey`    |
-| **Ports**       | `src/core/ports/`                   | domain only         | `ICameraPermissionPort`, `ILocalePort` |
-| **Adapters**    | `src/adapters/`                     | ports + one library | `ExpoCameraPermissionAdapter`          |
-| **Application** | `src/application/`                  | ports + adapters    | `CameraProvider` (DI via Context)      |
-| **UI**          | `components/`, `screens/`, `hooks/` | ports only          | `PermissionGate`, `useCamera`          |
+| Layer           | Directory                           | Knows about         | Example                                                  |
+| --------------- | ----------------------------------- | ------------------- | -------------------------------------------------------- |
+| **Domain**      | `src/core/domain/`                  | nothing (pure TS)   | `PermissionState`, `TranslationKey`                      |
+| **Ports**       | `src/core/ports/`                   | domain only         | `ICameraPermissionPort`, `ILocalePort`, `IHintStorePort` |
+| **Adapters**    | `src/adapters/`                     | ports + one library | `ExpoCameraPermissionAdapter`                            |
+| **Application** | `src/application/`                  | ports + adapters    | `CameraProvider` (DI via Context)                        |
+| **UI**          | `components/`, `screens/`, `hooks/` | ports only          | `PermissionGate`, `useCamera`                            |
 
 `ExpoCameraPermissionAdapter.ts` documents the boundary in its own header:
 _"the **only** file in the application that imports from `expo-camera` for permission
@@ -91,14 +94,14 @@ concerns."_ The boundary is a convention enforced by review and by the folder la
 
 ## 4. Design patterns in use
 
-| Pattern                  | Location                                                      | Why                                                                       |
-| ------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **Adapter**              | `adapters/expo-camera`, `adapters/expo-localization`          | wrap third-party hooks behind a port                                      |
-| **Dependency Injection** | `CameraProvider`, `LocaleProvider`                            | inject a port implementation through React Context                        |
-| **Facade**               | `hooks/useCamera`                                             | hides permission lifecycle + `cameraRef` + `isReady` behind one hook      |
-| **Guard / Gate**         | `components/PermissionGate`                                   | renders one of four permission states, keeping `MirrorScreen` declarative |
-| **Strategy**             | `i18n/translations/*` selected at runtime; swappable adapters | behaviour chosen by data/config                                           |
-| **Fail-fast**            | `useLocale`, `useCameraPermission`                            | throw immediately if used outside their provider                          |
+| Pattern                  | Location                                                        | Why                                                                       |
+| ------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Adapter**              | `adapters/expo-camera`, `expo-localization`, `expo-file-system` | wrap third-party hooks behind a port                                      |
+| **Dependency Injection** | `CameraProvider`, `LocaleProvider`, `HintStoreProvider`         | inject a port implementation through React Context                        |
+| **Facade**               | `hooks/useCamera`                                               | hides permission lifecycle + `cameraRef` + `isReady` behind one hook      |
+| **Guard / Gate**         | `components/PermissionGate`                                     | renders one of four permission states, keeping `MirrorScreen` declarative |
+| **Strategy**             | `i18n/translations/*` selected at runtime; swappable adapters   | behaviour chosen by data/config                                           |
+| **Fail-fast**            | `useLocale`, `useCameraPermission`                              | throw immediately if used outside their provider                          |
 
 ---
 
