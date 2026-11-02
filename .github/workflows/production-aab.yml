@@ -1,0 +1,81 @@
+name: Production AAB (local, free)
+
+# Builds the signed Play Store bundle (.aab) on a GitHub runner and attaches it
+# to the run as a downloadable artifact, for uploading by hand in Play Console.
+#
+# ⚠️ `--local` IS THE WHOLE POINT. eas-build.yml buys the same bundle from EAS's
+# servers and costs a build credit; here EAS only supplies the signing
+# credentials and the compute is this runner's, which is free. Drop the flag and
+# this becomes a credit-spending workflow. .github/workflows/paid-builds.test.ts
+# asserts it stays.
+#
+# ⚠️ THE BUILD NUMBER STILL MOVES. The production profile sets `autoIncrement`
+# and `appVersionSource` is "remote", so EAS increments versionCode as the first
+# thing the CLI does, even for a local build. It costs no credit, but a run that
+# fails after that point has spent a number that nothing can give back. Dispatch
+# it once the version in package.json / app.json is the one to ship.
+#
+# Dispatch-only on purpose: a git operation must never be able to start it.
+# `gh workflow run production-aab.yml --ref main`
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build production AAB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # The Android Gradle Plugin requires Java 17; ubuntu-latest ships JDK 11.
+      - name: Setup Java 17
+        uses: actions/setup-java@v6
+        with:
+          java-version: '17'
+          distribution: temurin
+
+      - name: Read version
+        id: version
+        run: echo "name=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Build Android AAB (local)
+        run: >-
+          eas build --platform android --profile production --local --non-interactive
+          --output "$RUNNER_TEMP/miroji-${{ steps.version.outputs.name }}.aab"
+
+      # Short retention: the bundle is reproducible from the tag, and it only
+      # needs to live long enough to be uploaded to Play Console.
+      - name: Attach the AAB
+        uses: actions/upload-artifact@v7
+        with:
+          name: miroji-${{ steps.version.outputs.name }}-aab
+          path: ${{ runner.temp }}/miroji-${{ steps.version.outputs.name }}.aab
+          if-no-files-found: error
+          retention-days: 7
