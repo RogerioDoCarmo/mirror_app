@@ -2,9 +2,9 @@
 
     python store-assets/tools/compose.py [--set android/phone ...] [--out DIR]
 
-Raw captures live in ``store-assets/raw/<set>/`` (``<set>`` is one of the folder
-names under ``store-assets/screenshots/``) and are real screenshots of the
-running app, never mockups. Each slide below is a gradient, a caption and, for
+Raw captures live in ``store-assets/raw/<platform>/`` (``android`` or ``ios``) and
+are real screenshots of the running app, never mockups. Every set of a platform
+uses the same phone captures, scaled into a device frame, as the 1.3.x sets did. Each slide below is a gradient, a caption and, for
 most of them, a capture inside a device frame. Slides whose raw capture is
 missing are skipped and reported, so a set can be built as captures arrive.
 
@@ -213,13 +213,13 @@ def main() -> int:
 
     missing: list[str] = []
     for set_name in args.set or sorted(SETS):
-        size, out_dir, raw_dir = SETS[set_name], args.out / set_name, args.raw / set_name
+        size, out_dir, raw_dir = SETS[set_name], args.out / set_name, args.raw / set_name.split("/")[0]
         out_dir.mkdir(parents=True, exist_ok=True)
         for slide in SLIDES:
             image = render(slide, size, raw_dir)
             if image is None:
                 names = ", ".join(slide.frames)
-                missing.append(f"{set_name}: {slide.name} needs raw/{set_name}/ {names}")
+                missing.append(f"{set_name}: {slide.name} needs {raw_dir.name}/ {names}")
                 continue
             image.save(out_dir / f"{slide.name}.png", optimize=True)
             print("wrote", out_dir / f"{slide.name}.png")

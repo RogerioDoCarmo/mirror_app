@@ -68,10 +68,10 @@ A 31-second silent promo: the live mirror, pinch to zoom, the flip view, privacy
 ## Screenshots
 
 <p align="center">
-  <img src="store-assets/screenshots/android/landscape/01-hero.png" width="88%" alt="Just a mirror — a fast, beautifully simple front-camera mirror" />
-  <img src="store-assets/screenshots/android/landscape/02-mirror.png" width="88%" alt="Your mirror, in real time — the live front-camera view" />
-  <img src="store-assets/screenshots/android/landscape/03-privacy.png" width="88%" alt="Private by design — nothing is ever recorded, stored, or sent" />
-  <img src="store-assets/screenshots/android/landscape/05-permission.png" width="88%" alt="A clear, friendly permission flow" />
+  <img src="store-assets/screenshots/android/landscape/01-hero.png" width="88%" alt="Just a mirror — a fast, beautifully simple mirror" />
+  <img src="store-assets/screenshots/android/landscape/02-mirror.png" width="88%" alt="Your mirror, in real time — the live view with its floating buttons" />
+  <img src="store-assets/screenshots/android/landscape/06-privacy.png" width="88%" alt="Private by design — nothing is ever recorded, stored, or sent" />
+  <img src="store-assets/screenshots/android/landscape/08-permission.png" width="88%" alt="A clear, friendly permission flow" />
 </p>
 
 > The complete screenshot sets submitted to both stores (phone, tablet, landscape, and iPad) live in [`store-assets/`](store-assets/).
