@@ -1,19 +1,17 @@
 # Raw captures
 
-Real screenshots of the running app, one folder per store slot (same names as
-`../screenshots/`). `../tools/compose.py` turns them into the store images.
-Nothing here is a mockup: take them from a release build (Firebase or the store
-build) of the version being published.
+Real screenshots of the running app, one folder per platform. `../tools/compose.py`
+turns them into every store image. Nothing here is a mockup: take them from a
+release build (Firebase or the store build) of the version being published.
 
 ```text
 raw/
-  android/phone/          Poco / any phone          -> Google Play phone
-  android/tablet-7in/     7" tablet or emulator     -> Google Play 7" tablet
-  android/tablet-10in/    10" tablet or emulator    -> Google Play 10" tablet
-  android/landscape/      tablet, held sideways     -> Google Play Chromebook / XR
-  ios/phone/              iPhone                    -> App Store iPhone 6.5"
-  ios/ipad/               iPad                      -> App Store iPad 12.9"
+  android/   a phone (the Poco)  -> all Google Play sets: phone, 7" and 10" tablet, landscape
+  ios/       an iPhone           -> all App Store sets: iPhone 6.5" and iPad 12.9"
 ```
+
+The tablet, landscape and iPad sets reuse the phone captures inside a device
+frame, exactly as the 1.3.x sets did.
 
 Each folder takes the same five PNG files (a plain device screenshot, no
 editing; the tool scales it into a device frame):
@@ -36,3 +34,12 @@ Tips:
   tap once) before capturing, so no tip is on screen.
 - Keep the face, room and any text free of personal information: these images are
   published.
+
+## Current contents
+
+`mirror`, `mirrored`, `unmirrored` and `zoom` in both folders are derived from
+the 1.3.x store captures with `../tools/controls.py` (floating buttons drawn on,
+picture flipped or digitally zoomed), because the 1.4.0 build could not be run
+on a screenshot device when they were made. `back-torch.png` does not exist yet,
+so the `05-back-camera` slide is skipped. Replace any of these with a real
+capture of the same name and run `compose.py` again.
