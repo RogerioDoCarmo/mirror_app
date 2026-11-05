@@ -55,6 +55,16 @@ The app's functionality is intentionally simple. The focus of this project is **
 
 ---
 
+## Promo video
+
+<p align="center">
+  <a href="https://youtu.be/x4I-w_m2X3Y"><img src="https://img.youtube.com/vi/x4I-w_m2X3Y/hqdefault.jpg" width="60%" alt="Miroji promo video: a fast, simple mirror for Android and iOS (YouTube)" /></a>
+</p>
+
+A 31-second silent promo: the live mirror, pinch to zoom, the flip view, privacy and languages. [Watch it on YouTube](https://youtu.be/x4I-w_m2X3Y). The video file is kept in [`store-assets/promo/`](store-assets/promo/); the pictures in it come from the edited store captures.
+
+---
+
 ## Screenshots
 
 <p align="center">
