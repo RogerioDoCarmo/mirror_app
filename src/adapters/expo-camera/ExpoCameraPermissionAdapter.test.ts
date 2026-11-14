@@ -1,17 +1,16 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useCameraPermissions } from 'expo-camera';
+import { PermissionStatus, useCameraPermissions } from 'expo-camera';
 import type { PermissionResponse } from 'expo-camera';
 import { useExpoCameraPermission } from './ExpoCameraPermissionAdapter';
 
 // This is the only test suite that may legitimately mock expo-camera —
 // it is specifically testing the adapter that wraps it.
 jest.mock('expo-camera', () => ({
+  ...jest.requireActual<typeof import('expo-camera')>('expo-camera'),
   useCameraPermissions: jest.fn(),
 }));
 
 const mockUseCameraPermissions = jest.mocked(useCameraPermissions);
-
-type PermissionStatus = PermissionResponse['status'];
 
 const makeRaw = (
   overrides: Partial<PermissionResponse> & { status?: PermissionStatus } = {},
@@ -19,7 +18,7 @@ const makeRaw = (
   granted: false,
   canAskAgain: true,
   expires: 'never',
-  status: 'undetermined' as PermissionStatus,
+  status: PermissionStatus.UNDETERMINED,
   ...overrides,
 });
 
@@ -42,7 +41,7 @@ describe('useExpoCameraPermission', () => {
     const raw = makeRaw({
       granted: true,
       canAskAgain: true,
-      status: 'granted' as PermissionStatus,
+      status: PermissionStatus.GRANTED,
     });
     mockUseCameraPermissions.mockReturnValue([raw, mockRawRequest, jest.fn()]);
 
@@ -55,7 +54,7 @@ describe('useExpoCameraPermission', () => {
     const raw = makeRaw({
       granted: false,
       canAskAgain: true,
-      status: 'denied' as PermissionStatus,
+      status: PermissionStatus.DENIED,
     });
     mockUseCameraPermissions.mockReturnValue([raw, mockRawRequest, jest.fn()]);
 
@@ -68,7 +67,7 @@ describe('useExpoCameraPermission', () => {
     const raw = makeRaw({
       granted: false,
       canAskAgain: false,
-      status: 'denied' as PermissionStatus,
+      status: PermissionStatus.DENIED,
     });
     mockUseCameraPermissions.mockReturnValue([raw, mockRawRequest, jest.fn()]);
 
@@ -81,7 +80,7 @@ describe('useExpoCameraPermission', () => {
     const raw = makeRaw({
       granted: true,
       canAskAgain: true,
-      status: 'granted' as PermissionStatus,
+      status: PermissionStatus.GRANTED,
     });
     mockUseCameraPermissions.mockReturnValue([raw, mockRawRequest, jest.fn()]);
 
@@ -95,7 +94,7 @@ describe('useExpoCameraPermission', () => {
     const rawResult = makeRaw({
       granted: true,
       canAskAgain: true,
-      status: 'granted' as PermissionStatus,
+      status: PermissionStatus.GRANTED,
     });
     mockRawRequest.mockResolvedValue(rawResult);
     mockUseCameraPermissions.mockReturnValue([null, mockRawRequest, jest.fn()]);
@@ -173,7 +172,7 @@ describe('useExpoCameraPermission', () => {
       const raw = makeRaw({
         granted: true,
         canAskAgain: true,
-        status: 'granted' as PermissionStatus,
+        status: PermissionStatus.GRANTED,
       });
       // Simulate native module responding after a short delay (before timeout).
       mockUseCameraPermissions
