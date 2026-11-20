@@ -42,6 +42,7 @@
         }
       ],
       "./plugins/withCleanAndroidPermissions",
+      "./plugins/withOptionalPortraitFeature",
       [
         "expo-splash-screen",
         {
