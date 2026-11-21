@@ -40,7 +40,11 @@ const config = {
   // no trace in the app, so nothing else in the suite would notice one being
   // undone.  Still not <rootDir> itself: that is the path that reaches
   // .stryker-tmp/.
-  roots: ['<rootDir>/src', '<rootDir>/.github'],
+  //
+  // `plugins` is listed for the same reason: the Expo config plugins decide what
+  // the shipped Android manifest declares (e.g. withOptionalPortraitFeature keeps
+  // Google Play from filtering the app out), and nothing in src/ exercises them.
+  roots: ['<rootDir>/src', '<rootDir>/.github', '<rootDir>/plugins'],
   testPathIgnorePatterns: ['/node_modules/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
