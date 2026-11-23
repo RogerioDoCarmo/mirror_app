@@ -26,7 +26,13 @@ produced until a real back-camera capture with the flashlight on exists.
 | `screenshots/android/tablet-10in/` | Google Play — 10″ tablet      | 1600×2560  |
 | `screenshots/android/landscape/`   | Google Play — Chromebook / XR | 1920×1080  |
 | `screenshots/ios/phone/`           | App Store — iPhone 6.5″       | 1242×2688  |
+| `screenshots/ios/phone-6.3/`       | App Store — iPhone 6.1/6.3″   | 1206×2622  |
+| `screenshots/ios/phone-6.9/`       | App Store — iPhone 6.9″       | 1320×2868  |
 | `screenshots/ios/ipad/`            | App Store — iPad 12.9″        | 2064×2752  |
+
+App Store Connect now rejects 1242×2688 in the Dynamic Island iPhone slots
+("invalid dimensions"), so use `phone-6.3` (or `phone-6.9` for the large slot).
+`phone/` is kept for the older 6.5″ slot.
 
 First submitted with **v1.3.1 (build 20)**; redone for **v1.4.0**.
 
