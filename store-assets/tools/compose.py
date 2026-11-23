@@ -33,8 +33,18 @@ SETS: dict[str, tuple[int, int]] = {
     "android/tablet-10in": (1600, 2560),
     "android/landscape": (1920, 1080),
     "ios/phone": (1242, 2688),
+    # App Store Connect now asks for the Dynamic Island iPhone sizes: 6.1"/6.3"
+    # accepts only 1179x2556 or 1206x2622, and 6.9" only 1260x2736, 1290x2796 or
+    # 1320x2868. 1242x2688 (the 6.5" set above) is rejected as "invalid dimensions".
+    "ios/phone-6.3": (1206, 2622),
+    "ios/phone-6.9": (1320, 2868),
     "ios/ipad": (2064, 2752),
 }
+
+# The permission slide (LEGACY below) has no raw capture, so these sets take it
+# from the set named here, rescaled. Every iPhone size is within 0.5% of the same
+# aspect ratio, so nothing visibly stretches.
+RESCALED_FROM = {"ios/phone-6.3": "ios/phone", "ios/phone-6.9": "ios/phone"}
 
 WHITE = (255, 255, 255)
 SUBTITLE = (205, 224, 252)
@@ -228,6 +238,13 @@ def main() -> int:
             if src.exists() and args.out == SCREENSHOTS and not (out_dir / new).exists():
                 os.replace(src, out_dir / new)
                 print("renamed", src.name, "->", new)
+        if set_name in RESCALED_FROM:
+            for new in LEGACY.values():
+                src = args.out / RESCALED_FROM[set_name] / new
+                if src.exists():
+                    Image.open(src).convert("RGB").resize(size, Image.LANCZOS).save(
+                        out_dir / new, optimize=True)
+                    print("rescaled", src, "->", out_dir / new)
     for line in missing:
         print("skipped:", line, file=sys.stderr)
     return 0
